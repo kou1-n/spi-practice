@@ -1,0 +1,46 @@
+const CACHE_NAME = 'spi-practice-v1';
+const ASSETS = [
+  './',
+  './index.html',
+  './quiz_data_set4.js',
+  './quiz_data_set5.js',
+  './quiz_data_set6.js',
+  './quiz_data_set7.js',
+  './quiz_data_set8.js',
+  './quiz_data_set9.js',
+  './quiz_data_set10.js',
+  './quiz_data_set11.js',
+  './test_schedule_data.js',
+  './manifest.json'
+];
+
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      const fetchPromise = fetch(e.request).then(response => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        }
+        return response;
+      }).catch(() => cached);
+      return cached || fetchPromise;
+    })
+  );
+});

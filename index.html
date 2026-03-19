@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>テストセンター練習</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563EB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #2563EB; --accent-light: #DBEAFE; --accent-dark: #1D4ED8;
+  --correct: #16A34A; --correct-light: #DCFCE7;
+  --wrong: #DC2626; --wrong-light: #FEE2E2;
+  --bg: #F8FAFC; --card: #FFFFFF; --text: #1E293B; --text-sub: #64748B;
+  --border: #E2E8F0; --progress-bg: #E2E8F0; --blockquote-bg: #F1F5F9;
+  --shadow: 0 4px 16px rgba(0,0,0,0.10); --radius: 16px;
+  --font: 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+}
+[data-dark="true"] {
+  --bg: #0F172A; --card: #1E293B; --text: #F1F5F9; --text-sub: #94A3B8;
+  --border: #334155; --progress-bg: #334155; --blockquote-bg: #0F172A;
+  --accent-light: #1E3A5F; --correct-light: #052E16; --wrong-light: #450A0A;
+  --shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; -webkit-tap-highlight-color: transparent; }
+
+#screen-top { display: flex; flex-direction: column; min-height: 100vh; padding: 24px 16px 32px; max-width: 540px; margin: 0 auto; }
+.app-title { font-size: 1.4rem; font-weight: 700; color: var(--accent); text-align: center; margin-bottom: 4px; }
+.app-subtitle { font-size: 0.85rem; color: var(--text-sub); text-align: center; margin-bottom: 20px; }
+.dark-toggle-top { position: fixed; top: 12px; right: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; color: var(--text); z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+/* Set selector */
+.set-section { margin-bottom: 20px; }
+.set-section h3 { font-size: 0.9rem; color: var(--text-sub); margin-bottom: 10px; text-align: center; }
+.set-grid { display: flex; flex-direction: column; gap: 10px; }
+.set-btn { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 14px 16px; cursor: pointer; text-align: left; transition: all 0.2s; box-shadow: var(--shadow); display: flex; align-items: center; gap: 12px; }
+.set-btn:hover, .set-btn:active, .set-btn.active { border-color: var(--accent); background: var(--accent-light); }
+.set-icon { font-size: 1.6rem; flex-shrink: 0; }
+.set-info { flex: 1; }
+.set-name { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+.set-desc { font-size: 0.75rem; color: var(--text-sub); margin-top: 2px; }
+.set-badge { font-size: 0.7rem; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+
+/* Mode grid */
+.mode-section { display: none; margin-bottom: 20px; }
+.mode-section.show { display: block; }
+.mode-section h3 { font-size: 0.9rem; color: var(--text-sub); margin-bottom: 10px; text-align: center; }
+.mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.mode-btn { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 16px 10px; cursor: pointer; text-align: center; transition: all 0.2s; box-shadow: var(--shadow); }
+.mode-btn:hover, .mode-btn:active { border-color: var(--accent); background: var(--accent-light); }
+.mode-btn .mode-icon { font-size: 1.6rem; margin-bottom: 4px; }
+.mode-btn .mode-name { font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.mode-btn .mode-desc { font-size: 0.72rem; color: var(--text-sub); }
+
+.category-section { background: var(--card); border-radius: var(--radius); padding: 14px; margin-bottom: 14px; box-shadow: var(--shadow); display: none; }
+.category-section.show { display: block; }
+.category-section h3 { font-size: 0.88rem; color: var(--text-sub); margin-bottom: 10px; }
+.category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cat-btn { border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 8px; background: var(--bg); cursor: pointer; font-size: 0.82rem; font-weight: 500; color: var(--text); text-align: center; transition: all 0.18s; }
+.cat-btn:hover, .cat-btn:active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+.history-section { background: var(--card); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); }
+.history-section h3 { font-size: 0.88rem; color: var(--text-sub); margin-bottom: 8px; }
+.history-list { display: flex; flex-direction: column; gap: 5px; }
+.history-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; padding: 7px 10px; background: var(--bg); border-radius: 8px; }
+.history-score { font-weight: 700; color: var(--accent); }
+.history-meta { color: var(--text-sub); }
+.history-empty { color: var(--text-sub); font-size: 0.82rem; text-align: center; padding: 10px; }
+
+/* Quiz screen */
+#screen-quiz { display: none; max-width: 540px; margin: 0 auto; padding: 0 0 80px; }
+.quiz-header { position: sticky; top: 0; z-index: 50; background: var(--bg); padding: 10px 16px 8px; border-bottom: 1px solid var(--border); }
+.quiz-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.quiz-meta { font-size: 0.8rem; color: var(--text-sub); }
+.timer { font-size: 0.9rem; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.progress-bar-wrap { background: var(--progress-bg); border-radius: 99px; height: 6px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.4s ease; }
+.card-wrap { padding: 12px 16px; min-height: 60vh; }
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 18px; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes slideLeft { from { opacity: 1; } to { opacity: 0; transform: translateX(-40px); } }
+.card.slide-out { animation: slideLeft 0.2s ease forwards; }
+.q-category { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-bottom: 10px; background: var(--accent-light); color: var(--accent); }
+.q-number { font-size: 0.8rem; color: var(--text-sub); margin-bottom: 6px; }
+.q-text { font-size: 0.95rem; line-height: 1.75; color: var(--text); margin-bottom: 14px; }
+.q-text ul { padding-left: 20px; margin: 8px 0; }
+.q-text li { margin-bottom: 4px; }
+.q-blockquote { background: var(--blockquote-bg); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 12px 14px; font-size: 0.9rem; line-height: 1.8; margin: 10px 0; }
+.q-premise { background: var(--blockquote-bg); border-radius: 8px; padding: 10px 14px; font-size: 0.88rem; line-height: 1.7; margin: 10px 0; }
+
+/* Structure items for 構造把握 */
+.structure-items { margin: 10px 0; display: flex; flex-direction: column; gap: 8px; }
+.structure-items .item { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 0.88rem; line-height: 1.65; display: flex; gap: 10px; align-items: flex-start; }
+.structure-items .item-label { font-weight: 700; color: var(--accent); font-size: 1rem; flex-shrink: 0; min-width: 20px; }
+
+/* Quiz table for 表の虫食い */
+.quiz-table { border-collapse: collapse; width: 100%; font-size: 0.82rem; margin: 10px 0; }
+.quiz-table th, .quiz-table td { border: 1px solid var(--border); padding: 6px 8px; text-align: center; white-space: nowrap; }
+.quiz-table th { background: var(--accent-light); color: var(--accent); font-weight: 700; font-size: 0.78rem; }
+.quiz-table td { background: var(--card); }
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 8px 0; }
+.blank { color: var(--wrong); font-weight: 700; font-size: 1rem; }
+
+.choices { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.choice-btn { display: flex; align-items: flex-start; gap: 10px; background: var(--bg); border: 2px solid var(--border); border-radius: 12px; padding: 13px 14px; min-height: 48px; cursor: pointer; font-size: 0.9rem; font-family: var(--font); color: var(--text); text-align: left; line-height: 1.55; transition: border-color 0.15s, background 0.15s; -webkit-tap-highlight-color: transparent; }
+.choice-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+.choice-btn:disabled { cursor: default; }
+.choice-label { font-weight: 700; font-size: 0.95rem; color: var(--accent); flex-shrink: 0; min-width: 20px; }
+.choice-btn.correct { border-color: var(--correct); background: var(--correct-light); }
+.choice-btn.correct .choice-label { color: var(--correct); }
+.choice-btn.wrong { border-color: var(--wrong); background: var(--wrong-light); }
+.choice-btn.wrong .choice-label { color: var(--wrong); }
+.choice-btn.highlight-correct { border-color: var(--correct); background: var(--correct-light); }
+.choice-btn.highlight-correct .choice-label { color: var(--correct); }
+
+.answer-result { display: none; padding: 12px 14px; border-radius: 10px; font-size: 0.9rem; font-weight: 700; margin-bottom: 12px; animation: fadeIn 0.25s ease; }
+.answer-result.show { display: block; }
+.answer-result.correct { background: var(--correct-light); color: var(--correct); }
+.answer-result.wrong { background: var(--wrong-light); color: var(--wrong); }
+
+.explanation-toggle { width: 100%; background: var(--accent-light); border: none; border-radius: 10px; padding: 11px 14px; font-size: 0.88rem; font-weight: 700; color: var(--accent); cursor: pointer; margin-bottom: 10px; font-family: var(--font); text-align: left; display: none; }
+.explanation-toggle.show { display: block; }
+.explanation-box { background: var(--blockquote-bg); border-radius: 10px; padding: 14px; font-size: 0.85rem; line-height: 1.75; color: var(--text); margin-bottom: 12px; display: none; animation: fadeIn 0.25s ease; }
+.explanation-box.show { display: block; }
+.explanation-box h4 { font-size: 0.84rem; font-weight: 700; color: var(--accent); margin: 10px 0 5px; }
+.explanation-box ul, .explanation-box ol { padding-left: 18px; margin: 4px 0; }
+.explanation-box li { margin-bottom: 3px; }
+.explanation-box table { border-collapse: collapse; width: 100%; font-size: 0.78rem; margin: 6px 0; }
+.explanation-box th, .explanation-box td { border: 1px solid var(--border); padding: 4px 7px; text-align: left; }
+.explanation-box th { background: var(--accent-light); color: var(--accent); font-weight: 700; }
+.explanation-box p { margin: 6px 0; }
+.explanation-box .tip { background: #FEF9C3; color: #854D0E; border-radius: 6px; padding: 7px 10px; font-size: 0.82rem; margin-top: 8px; }
+[data-dark="true"] .explanation-box .tip { background: #3D2B00; color: #FCD34D; }
+
+.next-btn { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 15px; font-size: 1rem; font-weight: 700; font-family: var(--font); cursor: pointer; display: none; transition: background 0.15s; }
+.next-btn.show { display: block; }
+.next-btn:hover { background: var(--accent-dark); }
+
+/* Result screen */
+#screen-result { display: none; max-width: 540px; margin: 0 auto; padding: 20px 16px 40px; }
+.result-header { text-align: center; margin-bottom: 20px; }
+.result-header h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+.result-time { font-size: 0.85rem; color: var(--text-sub); }
+.result-big { text-align: center; font-size: 3rem; font-weight: 700; color: var(--accent); line-height: 1; }
+.result-big span { font-size: 1.2rem; font-weight: 500; color: var(--text-sub); }
+.result-card { background: var(--card); border-radius: var(--radius); padding: 18px; margin: 14px 0; box-shadow: var(--shadow); }
+.result-card h3 { font-size: 0.9rem; color: var(--text-sub); margin-bottom: 12px; }
+.circle-wrap { display: flex; justify-content: center; margin: 8px 0 4px; }
+.circle-chart { transform: rotate(-90deg); }
+.circle-bg { fill: none; stroke: var(--progress-bg); stroke-width: 12; }
+.circle-fill { fill: none; stroke: var(--accent); stroke-width: 12; stroke-linecap: round; transition: stroke-dasharray 0.8s ease; }
+.circle-label { font-size: 1.5rem; font-weight: 700; fill: var(--text); text-anchor: middle; dominant-baseline: central; }
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: flex; align-items: center; gap: 8px; }
+.bar-label { font-size: 0.78rem; color: var(--text-sub); width: 90px; flex-shrink: 0; }
+.bar-track { flex: 1; background: var(--progress-bg); border-radius: 99px; height: 12px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.7s ease; }
+.bar-val { font-size: 0.82rem; font-weight: 700; color: var(--accent); width: 40px; text-align: right; flex-shrink: 0; }
+.result-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.result-btn { width: 100%; border-radius: 12px; padding: 14px; font-size: 0.95rem; font-weight: 700; font-family: var(--font); cursor: pointer; transition: all 0.15s; }
+.result-btn-primary { background: var(--accent); color: #fff; border: none; }
+.result-btn-primary:hover { background: var(--accent-dark); }
+.result-btn-secondary { background: var(--card); color: var(--accent); border: 2px solid var(--accent); }
+.result-btn-secondary:hover { background: var(--accent-light); }
+.back-home { background: none; border: none; cursor: pointer; color: var(--text-sub); font-size: 0.8rem; padding: 4px 0; font-family: var(--font); }
+.back-home:hover { color: var(--accent); }
+.dark-toggle-quiz { background: none; border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; color: var(--text-sub); }
+.mode-badge { font-size: 0.72rem; background: var(--accent-light); color: var(--accent); padding: 2px 8px; border-radius: 99px; font-weight: 700; }
+.swipe-hint { text-align: center; font-size: 0.75rem; color: var(--text-sub); margin-top: 12px; opacity: 0.7; }
+.weak-empty { text-align: center; padding: 40px 20px; color: var(--text-sub); font-size: 0.9rem; }
+
+/* Analytics Dashboard */
+.analytics-section { margin-bottom: 20px; }
+.analytics-btn { width: 100%; background: linear-gradient(135deg, var(--accent), #7C3AED); color: #fff; border: none; border-radius: var(--radius); padding: 16px; font-size: 1rem; font-weight: 700; font-family: var(--font); cursor: pointer; box-shadow: var(--shadow); transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.analytics-btn:hover { opacity: 0.9; }
+
+#screen-analytics { display: none; max-width: 540px; margin: 0 auto; padding: 20px 16px 40px; }
+.analytics-back { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.analytics-title { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+.analytics-card { background: var(--card); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.analytics-card h3 { font-size: 0.92rem; color: var(--text-sub); margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.analytics-stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.analytics-stat { text-align: center; }
+.analytics-stat .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+.analytics-stat .stat-label { font-size: 0.75rem; color: var(--text-sub); margin-top: 2px; }
+
+.a-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.a-bar-label { font-size: 0.78rem; color: var(--text); width: 100px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.a-bar-track { flex: 1; background: var(--progress-bg); border-radius: 99px; height: 14px; overflow: hidden; position: relative; }
+.a-bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; min-width: 2px; }
+.a-bar-fill.high { background: var(--correct); }
+.a-bar-fill.mid { background: var(--accent); }
+.a-bar-fill.low { background: #F59E0B; }
+.a-bar-fill.vlow { background: var(--wrong); }
+.a-bar-val { font-size: 0.78rem; font-weight: 700; color: var(--text); width: 65px; text-align: right; flex-shrink: 0; }
+
+.weak-list { display: flex; flex-direction: column; gap: 8px; }
+.weak-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--bg); border-radius: 10px; border-left: 4px solid var(--wrong); }
+.weak-item .weak-name { font-size: 0.82rem; color: var(--text); font-weight: 500; }
+.weak-item .weak-detail { font-size: 0.75rem; color: var(--text-sub); }
+.weak-item .weak-pct { font-size: 0.88rem; font-weight: 700; color: var(--wrong); }
+.weak-none { text-align: center; color: var(--text-sub); font-size: 0.85rem; padding: 12px; }
+
+/* Trend chart (SVG) */
+.trend-chart-wrap { width: 100%; overflow-x: auto; }
+.trend-chart { width: 100%; min-width: 300px; }
+.trend-line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.trend-dot { fill: var(--accent); }
+.trend-grid-line { stroke: var(--border); stroke-width: 0.5; }
+.trend-label { font-size: 10px; fill: var(--text-sub); font-family: var(--font); }
+.trend-label-y { font-size: 10px; fill: var(--text-sub); font-family: var(--font); text-anchor: end; }
+.trend-area { fill: var(--accent); opacity: 0.1; }
+
+#radar-chart { max-width: 100%; height: auto; }
+.radar-grid { fill: none; stroke: var(--border); stroke-width: 0.5; }
+.radar-axis { stroke: var(--border); stroke-width: 0.5; }
+.radar-label { fill: var(--text-sub); font-size: 9px; text-anchor: middle; font-family: var(--font); }
+.radar-area { fill: var(--accent); fill-opacity: 0.2; stroke: var(--accent); stroke-opacity: 0.8; stroke-width: 2; }
+.radar-dot { fill: var(--accent); }
+
+#heatmap-cal { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+.heatmap-summary { text-align: center; font-size: 0.82rem; color: var(--text-sub); margin-top: 8px; }
+
+/* Histogram */
+.hist-desc { font-size: 0.8rem; color: var(--text-sub); margin-bottom: 12px; }
+.hist-chart { display: flex; align-items: flex-end; gap: 8px; height: 150px; padding: 0 8px; }
+.hist-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.hist-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 2px; transition: height 0.3s; }
+.hist-count { font-size: 0.75rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.hist-label { font-size: 0.7rem; color: var(--text-sub); margin-top: 6px; text-align: center; }
+
+.export-btn { width: 100%; background: var(--card); color: var(--accent); border: 2px solid var(--accent); border-radius: 12px; padding: 13px; font-size: 0.92rem; font-weight: 700; font-family: var(--font); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+.export-btn:hover { background: var(--accent-light); }
+.analytics-home-btn { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 0.95rem; font-weight: 700; font-family: var(--font); cursor: pointer; transition: background 0.15s; }
+.analytics-home-btn:hover { background: var(--accent-dark); }
+.analytics-empty { text-align: center; padding: 40px 20px; }
+.analytics-empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.analytics-empty .empty-text { color: var(--text-sub); font-size: 0.9rem; line-height: 1.6; }
+
+/* Test Schedule Panel */
+.schedule-section { margin-bottom: 20px; display: none; }
+.schedule-section h3 { font-size: 0.9rem; color: var(--text-sub); margin-bottom: 10px; text-align: center; }
+.schedule-cards { display: flex; flex-direction: column; gap: 10px; }
+.schedule-card { background: var(--card); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); border-left: 4px solid var(--accent); display: flex; align-items: center; gap: 12px; }
+.schedule-card.urgent { border-left-color: #DC2626; }
+.schedule-card.warning { border-left-color: #F59E0B; }
+.schedule-card.normal { border-left-color: var(--accent); }
+.schedule-card.past { border-left-color: #94A3B8; opacity: 0.6; }
+.schedule-days { min-width: 50px; text-align: center; line-height: 1.2; }
+.schedule-days .days-num { font-size: 1.6rem; font-weight: 700; }
+.schedule-days .days-label { font-size: 0.65rem; color: var(--text-sub); }
+.schedule-days.urgent { color: #DC2626; }
+.schedule-days.warning { color: #F59E0B; }
+.schedule-days.normal { color: var(--accent); }
+.schedule-days.past { color: #94A3B8; }
+.schedule-info { flex: 1; }
+.schedule-company { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+.schedule-date { font-size: 0.78rem; color: var(--text-sub); margin-top: 2px; }
+.schedule-detail { font-size: 0.72rem; color: var(--text-sub); margin-top: 2px; }
+.schedule-type-badge { font-size: 0.68rem; padding: 2px 8px; border-radius: 99px; font-weight: 700; flex-shrink: 0; }
+.schedule-type-badge.tc { background: #DBEAFE; color: #1D4ED8; }
+.schedule-type-badge.web { background: #FEF3C7; color: #92400E; }
+[data-dark="true"] .schedule-type-badge.tc { background: #1E3A5F; color: #93C5FD; }
+[data-dark="true"] .schedule-type-badge.web { background: #3D2B00; color: #FCD34D; }
+
+/* Company Test Map Section */
+.company-section { margin-bottom: 20px; display: none; }
+.company-toggle { width: 100%; background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 14px 16px; font-size: 0.9rem; font-weight: 700; font-family: var(--font); color: var(--text); cursor: pointer; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
+.company-toggle:hover { border-color: var(--accent); }
+.company-toggle .toggle-arrow { transition: transform 0.3s; }
+.company-toggle.open .toggle-arrow { transform: rotate(180deg); }
+.company-list { display: none; flex-direction: column; gap: 10px; margin-top: 10px; }
+.company-list.show { display: flex; }
+.company-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); cursor: pointer; transition: all 0.2s; }
+.company-card:hover { border-color: var(--accent); }
+.company-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.company-card-name { font-size: 0.92rem; font-weight: 700; color: var(--text); }
+.company-format { font-size: 0.72rem; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
+.company-format.confirmed { background: #DBEAFE; color: #1D4ED8; }
+.company-format.estimated { background: #E2E8F0; color: #64748B; }
+.company-format.unconfirmed { background: #FEE2E2; color: #DC2626; }
+[data-dark="true"] .company-format.confirmed { background: #1E3A5F; color: #93C5FD; }
+[data-dark="true"] .company-format.estimated { background: #334155; color: #94A3B8; }
+[data-dark="true"] .company-format.unconfirmed { background: #450A0A; color: #FCA5A5; }
+.part-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.part-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
+.part-badge.active { background: #DBEAFE; color: #1D4ED8; }
+.part-badge.inactive { background: var(--bg); color: var(--text-sub); text-decoration: line-through; opacity: 0.5; }
+.part-badge.unknown { background: var(--bg); color: var(--text-sub); }
+[data-dark="true"] .part-badge.active { background: #1E3A5F; color: #93C5FD; }
+.company-sets { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.company-sets.show { display: block; }
+.company-sets h4 { font-size: 0.78rem; color: var(--text-sub); margin-bottom: 8px; }
+.company-set-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.company-set-btn { font-size: 0.78rem; padding: 6px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; font-family: var(--font); font-weight: 500; transition: all 0.15s; }
+.company-set-btn:hover { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+/* Timer countdown mode */
+.timer-settings { margin-top: 12px; padding: 12px; background: var(--bg); border-radius: 10px; }
+.timer-toggle-wrap { display: flex; align-items: center; justify-content: space-between; }
+.timer-toggle-label { font-size: 0.82rem; color: var(--text); font-weight: 500; }
+.timer-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.timer-switch input { opacity: 0; width: 0; height: 0; }
+.timer-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--border); border-radius: 24px; transition: 0.3s; }
+.timer-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+.timer-switch input:checked + .timer-slider { background: var(--accent); }
+.timer-switch input:checked + .timer-slider:before { transform: translateX(20px); }
+.timer-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.timer-preset { font-size: 0.75rem; padding: 5px 10px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; font-family: var(--font); transition: all 0.15s; }
+.timer-preset:hover, .timer-preset.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+.timer.countdown.warning { color: #F59E0B; }
+.timer.countdown.urgent { animation: timerBlink 0.5s ease infinite; color: #DC2626; }
+@keyframes timerBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+
+<div id="screen-top">
+  <button class="dark-toggle-top" onclick="toggleDark()" id="dark-btn-top"></button>
+  <div style="height:44px"></div>
+  <div class="app-title">テストセンター練習</div>
+  <div class="app-subtitle">全309問 ── 10セット対応</div>
+
+  <div class="schedule-section" id="schedule-container"></div>
+
+  <div class="company-section" id="company-container"></div>
+
+  <div class="analytics-section">
+    <button class="analytics-btn" onclick="showAnalytics()">&#x1F4CA; 学習分析ダッシュボード</button>
+  </div>
+
+  <div class="set-section">
+    <h3>セットを選択</h3>
+    <div class="set-grid" id="set-grid">
+      <button class="set-btn" onclick="selectSet('set1')">
+        <div class="set-icon">1</div>
+        <div class="set-info"><div class="set-name">第1セット</div><div class="set-desc">言語・非言語・並べ替え・確率</div></div>
+        <div class="set-badge">12問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set2')">
+        <div class="set-icon">2</div>
+        <div class="set-info"><div class="set-name">第2セット</div><div class="set-desc">順序確定・語句用法・表の虫食い</div></div>
+        <div class="set-badge">12問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set3')">
+        <div class="set-icon">3</div>
+        <div class="set-info"><div class="set-name">第3セット 構造把握</div><div class="set-desc">文章の構造把握・数理の構造把握</div></div>
+        <div class="set-badge">8問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set4')">
+        <div class="set-icon">4</div>
+        <div class="set-info"><div class="set-name">第4セット</div><div class="set-desc">言語・文章読解ABC判定</div></div>
+        <div class="set-badge">53問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set5')">
+        <div class="set-icon">5</div>
+        <div class="set-info"><div class="set-name">第5セット</div><div class="set-desc">非言語・図表の読み取り</div></div>
+        <div class="set-badge">40問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set6')">
+        <div class="set-icon">6</div>
+        <div class="set-info"><div class="set-name">第6セット</div><div class="set-desc">英語・英文読解</div></div>
+        <div class="set-badge">24問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set7')">
+        <div class="set-icon">7</div>
+        <div class="set-info"><div class="set-name">第7セット</div><div class="set-desc">非言語・図表の読み取り</div></div>
+        <div class="set-badge">40問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set8')">
+        <div class="set-icon">8</div>
+        <div class="set-info"><div class="set-name">第8セット</div><div class="set-desc">言語・文章読解ABC判定</div></div>
+        <div class="set-badge">43問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set9')">
+        <div class="set-icon">9</div>
+        <div class="set-info"><div class="set-name">第9セット</div><div class="set-desc">言語・文章読解ABC判定</div></div>
+        <div class="set-badge">43問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set10')">
+        <div class="set-icon">10</div>
+        <div class="set-info"><div class="set-name">第10セット</div><div class="set-desc">非言語・推測問題</div></div>
+        <div class="set-badge">35問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set11')">
+        <div class="set-icon">11</div>
+        <div class="set-info"><div class="set-name">第11セット</div><div class="set-desc">Docker／コンテナ技術</div></div>
+        <div class="set-badge">15問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('all')">
+        <div class="set-icon">*</div>
+        <div class="set-info"><div class="set-name">全セット混合</div><div class="set-desc">全324問からランダム出題</div></div>
+        <div class="set-badge">324問</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="mode-section" id="mode-section">
+    <h3 id="mode-section-title">モードを選択</h3>
+    <div class="mode-grid">
+      <button class="mode-btn" onclick="startMode('normal')"><div class="mode-icon">&#x1F4DD;</div><div class="mode-name">通常</div><div class="mode-desc">順番に解く</div></button>
+      <button class="mode-btn" onclick="startMode('random')"><div class="mode-icon">&#x1F500;</div><div class="mode-name">ランダム</div><div class="mode-desc">シャッフル</div></button>
+      <button class="mode-btn" onclick="startMode('weak')"><div class="mode-icon">&#x1F4AA;</div><div class="mode-name">弱点復習</div><div class="mode-desc">前回の不正解</div></button>
+      <button class="mode-btn" onclick="showCatSection()"><div class="mode-icon">&#x1F3AF;</div><div class="mode-name">分野別</div><div class="mode-desc">分野を選択</div></button>
+    </div>
+    <div class="timer-settings">
+      <div class="timer-toggle-wrap">
+        <span class="timer-toggle-label">制限時間あり</span>
+        <label class="timer-switch">
+          <input type="checkbox" id="countdown-toggle" onchange="toggleCountdown()">
+          <span class="timer-slider"></span>
+        </label>
+      </div>
+      <div class="timer-presets" id="timer-presets" style="display:none">
+        <button class="timer-preset" onclick="setTimeLimit(720,this)">言語 12分</button>
+        <button class="timer-preset" onclick="setTimeLimit(1200,this)">非言語 20分</button>
+        <button class="timer-preset" onclick="setTimeLimit(1200,this)">構造把握 20分</button>
+        <button class="timer-preset" onclick="setTimeLimit(600,this)">英語 10分</button>
+        <button class="timer-preset" onclick="setTimeLimit(300,this)">5分</button>
+        <button class="timer-preset" onclick="setTimeLimit(900,this)">15分</button>
+      </div>
+    </div>
+    <div class="category-section" id="category-section"></div>
+  </div>
+
+  <div class="history-section">
+    <h3>成績履歴（直近5回）</h3>
+    <div class="history-list" id="top-history"></div>
+  </div>
+</div>
+
+<div id="screen-quiz">
+  <div class="quiz-header">
+    <div class="quiz-header-top">
+      <button class="back-home" onclick="goHome()">&larr; ホーム</button>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="mode-badge" id="mode-badge"></span>
+        <span class="timer" id="timer-display">0:00</span>
+        <button class="dark-toggle-quiz" onclick="toggleDark()" id="dark-btn-quiz"></button>
+      </div>
+    </div>
+    <div class="quiz-meta" id="q-progress-text">問1 / 12</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+  </div>
+  <div class="card-wrap">
+    <div class="card" id="main-card"><div id="card-inner"></div></div>
+    <div class="swipe-hint" id="swipe-hint" style="display:none">&larr; スワイプで次の問題へ &rarr;</div>
+  </div>
+</div>
+
+<div id="screen-result">
+  <div class="result-header"><h2>結果</h2><div class="result-time" id="result-time"></div></div>
+  <div class="result-big" id="result-big"></div>
+  <div class="result-card">
+    <h3>正答率</h3>
+    <div class="circle-wrap">
+      <svg width="140" height="140" viewBox="0 0 140 140" class="circle-chart">
+        <circle class="circle-bg" cx="70" cy="70" r="54"/>
+        <circle class="circle-fill" id="circle-fill" cx="70" cy="70" r="54" stroke-dasharray="0 339.3"/>
+        <text x="70" y="70" class="circle-label" id="circle-label" transform="rotate(90,70,70)">0%</text>
+      </svg>
+    </div>
+  </div>
+  <div class="result-card"><h3>分野別成績</h3><div class="bar-chart" id="bar-chart"></div></div>
+  <div class="result-actions">
+    <button class="result-btn result-btn-primary" onclick="retryMode()">もう一度挑戦</button>
+    <button class="result-btn result-btn-secondary" onclick="startMode('weak')">間違えた問題を復習</button>
+    <button class="result-btn result-btn-secondary" onclick="goHome()">ホームへ戻る</button>
+  </div>
+</div>
+
+<div id="screen-analytics">
+  <div class="analytics-back">
+    <button class="back-home" onclick="goHome()">&larr; ホーム</button>
+    <span class="analytics-title">&#x1F4CA; 学習分析</span>
+    <button class="dark-toggle-quiz" onclick="toggleDark()" id="dark-btn-analytics"></button>
+  </div>
+  <div id="analytics-content"></div>
+</div>
+
+<script src="quiz_data_set4.js"></script>
+<script src="quiz_data_set5.js"></script>
+<script src="quiz_data_set6.js"></script>
+<script src="quiz_data_set7.js"></script>
+<script src="quiz_data_set8.js"></script>
+<script src="quiz_data_set9.js"></script>
+<script src="quiz_data_set10.js"></script>
+<script src="quiz_data_set11.js"></script>
+<script src="test_schedule_data.js"></script>
+<script>
+// ===== QUESTION DATA (SET1 - normalized) =====
+const SET1_RAW = [
+  {id:1,category:'言語',subtype:'主張把握',text:'次の文章を読み、筆者の主張として最も適切なものを選べ。',blockquote:'「データドリブン経営」という言葉が普及して久しいが、その実態は企業によって大きく異なる。数値目標の管理に留まる企業がある一方、顧客行動の微細な変化をリアルタイムで捉え、意思決定に反映させる企業もある。重要なのは、データを収集する技術ではなく、データが示す現象の背後にある「なぜ」を問い続ける思考習慣である。技術的なインフラがいかに整っていても、問いを立てられない組織では、データは単なる記録として眠り続けるだろう。また、問いが精緻でなければ、膨大なデータもノイズにしかならない。真の意味でデータを活用できる組織とは、分析技術ではなく、問いを立てる文化を持つ組織である。',choices:['データドリブン経営を実現するには最新の分析技術への投資が不可欠である','企業のデータ活用の成否は、問いを立てる文化の有無にかかっている','リアルタイムでデータを収集・更新できる体制を整えることが経営の急務だ','データドリブン経営の定義が企業間で統一されていないことが普及を妨げている'],answer:1,explanation:{summary:'正答: B。最終文「真の意味でデータを活用できる組織とは、分析技術ではなく、問いを立てる文化を持つ組織である」が筆者の結論。Bはこの主張の正確な言い換え。',steps:['主張把握の基本：最終文と強調表現（「重要なのは」「真の意味では」）の直後を先に読む','本文の最終文：「真の意味でデータを活用できる組織とは、分析技術ではなく、問いを立てる文化を持つ組織」→ これが筆者の結論','強調表現の確認：「重要なのは、データを収集する技術ではなく…『なぜ』を問い続ける思考習慣」→ 技術＜問い、という対比構造','選択肢B「データ活用の成否は問いを立てる文化の有無にかかっている」→ 最終文の正確な言い換え ✓','選択肢A「最新の分析技術への投資が不可欠」→ 本文は「分析技術ではなく」と明確に否定。真逆 ✗','選択肢C「リアルタイム収集体制が急務」→ 本文2文目の事例紹介であり筆者の推奨ではない ✗','選択肢D「定義の統一が普及を妨げる」→ 実態の違いには触れるが、統一を主張していない ✗'],traps:['A「技術投資が不可欠」：筆者は「技術ではなく」と否定。技術を一部認めているように見えるが結論は文化重視。対比構造の読み取りミス','C「リアルタイム収集体制」：「顧客行動をリアルタイムで捉え…」は一部企業の事例紹介であり、筆者の推奨ではない。事例と主張を混同するミス','D「定義の統一が普及を妨げる」：「実態は企業によって大きく異なる」は事実として述べているが、「だから統一すべき」とは書いていない。勝手な因果関係の付加'],tip:'主張把握の鉄則：①最終文 ②「重要なのは」「真の意味では」等の強調表現 ③「べきだ」「なければならない」等の当為表現をチェック。事例紹介と筆者の主張を区別する力が鍵。'}},
+  {id:2,category:'言語',subtype:'空欄補充',text:'次の文の（　）に入る語句として最も適切なものを選べ。\n\nその政策は施行当初から各方面で（　）を受けていたが、数年後の統計を見ると、懸念されていた副作用は生じておらず、むしろ指標の多くで改善が確認された。',choices:['賞賛','追認','懐疑','黙認'],answer:2,explanation:{summary:'正答: C（懐疑）。「〜を受けていたが…むしろ改善が確認された」という逆接構造。空欄には後半と対照的な否定的語が入る。「懐疑を受ける」は語法的にも自然。',steps:['文構造の分析：空欄（　）→「が」（逆接）→「副作用なし」「むしろ改善された」。「が」の前後は対照的な内容が来る','逆接の前半は否定的、後半は肯定的 → 空欄には否定的な語が必要','4択の肯定/否定を分類：A「賞賛」=肯定、B「追認」=肯定（承認の意味）、C「懐疑」=否定、D「黙認」=消極的容認 → 否定的なのはCのみ','語法の確認：「各方面で懐疑を受ける」=各所から疑いの目で見られる → 自然な日本語 ✓','文意の通し読み：「施行当初から各方面で懐疑を受けていたが、数年後には指標が改善」→ 「疑われていたが結果はよかった」で完全に通じる'],traps:['A「賞賛」：肯定的な語。逆接の後半が「改善された」（肯定）なので、前半も肯定だと逆接「が」が成立しない。論理矛盾','B「追認」：「追認を受ける」は正式な承認を後から得る意味。施行当初から受けるのは時系列的に不自然。また肯定的な語で逆接に合わない','D「黙認」：「各方面で黙認を受ける」は語法的に不自然。黙認は通常「黙認する」（主語が黙認する側）の形で使い、「黙認を受ける」とは言いにくい'],tip:'空欄補充の最速テクニック：逆接（が/しかし/一方）を見つけたら、前後の肯定/否定の方向性だけで選択肢を半減できる。本問では後半が肯定→前半は否定→Cのみ。語義を検討するまでもなく構造で1択に絞れる。'}},
+  {id:3,category:'言語',subtype:'語句用法',text:'「今回の事業失敗は、経営陣の慢心から生じたものだ」の「慢心」と最も近い意味で使われているものを選べ。',choices:['長年の努力が報われた結果、彼は慢心することなく次の目標を見据えた','強敵を連破した後の慢心が、チームの足元を掬った','慢心を戒める言葉として、「初心忘るべからず」はよく引用される','彼の慢心ぶりは周囲の反感を買い、孤立を招いた'],answer:1,explanation:{summary:'正答: B。問題文の「慢心」は「慢心→失敗」という因果関係の原因として使われている。Bの「連破後の慢心→足元を掬われた」は同一の因果構造。',steps:['問題文の分析：「事業失敗は、経営陣の慢心から生じた」→ 慢心が原因（from）、失敗が結果（to）。慢心は否定的な因果の起点として使われている','選択肢を3軸で分類する：①慢心の意味（おごり・油断）、②因果関係（原因→結果 or not）、③文脈（肯定/否定/メタ）','A「慢心することなく次の目標を見据えた」→ 「慢心しなかった」という否定文脈。慢心が実際には生じていない。構造が逆 ✗','B「強敵を連破した後の慢心が、チームの足元を掬った」→ 慢心=原因、足元を掬われた=悪結果。問題文と同じ「慢心→悪結果」の因果構造 ✓','C「慢心を戒める言葉として引用される」→ メタ的言及（慢心について語っている）。慢心が実際に起きているわけではなく、概念として参照されている ✗','D「彼の慢心ぶりは周囲の反感を買い、孤立を招いた」→ 一見因果に見えるが「慢心ぶり」は態度・様子を描写する副詞的用法。問題文の「慢心から生じた」（名詞・原因）とは用法が異なる ✗'],traps:['A：「慢心」の語義は同じだが、「することなく」で否定されている。語句用法の問題では「慢心する/しない」の肯定否定も用法の違いとみなす','C：「慢心を戒める」は慢心を概念として言及するメタ的用法。慢心が実際に生じている文脈ではない','D：「慢心ぶり」は慢心の態度・程度を描写する形。因果の原因として機能する問題文の「慢心から」とは文法的位置づけが異なる。Dを選ぶ誤答が最多'],tip:'語句用法の3軸判定法：①意味が同じか ②文中の機能（原因/結果/対象/否定）が同じか ③肯定/否定/メタのどれか。3軸すべてが一致する選択肢を選ぶ。意味だけ同じでも構造が異なれば不正解。'}},
+  {id:4,category:'言語',subtype:'論理関係',text:'次の前提から論理的に正しく導ける結論を選べ。',premise:'前提1：新製品を発売する企業は、必ず市場調査を実施している。\n前提2：市場調査を実施する企業は、競合他社を分析している。\n前提3：A社は競合他社の分析を行っていない。',choices:['A社は新製品を発売していない','A社は市場調査を実施していない','AとBの両方','A社は新製品を発売していないが、市場調査は実施している可能性がある'],answer:2,explanation:{summary:'正答: C（AとBの両方）。対偶の連鎖を使い、前提3「競合分析なし」からB「市場調査なし」を導き、さらにA「新製品なし」も導ける。両方正しいのでC。',steps:['前提を命題形式に整理：P1「新製品発売 → 市場調査実施」、P2「市場調査実施 → 競合分析」、P3「A社は競合分析をしていない」','対偶の原理を適用：命題「P→Q」が真なら、その対偶「¬Q→¬P」も真','P2の対偶：「競合分析なし → 市場調査なし」。P3よりA社は競合分析なし → A社は市場調査を実施していない → 選択肢B導出 ✓','P1の対偶：「市場調査なし → 新製品なし」。上でA社は市場調査なし → A社は新製品を発売していない → 選択肢A導出 ✓','AもBも導けるため、選択肢C「AとBの両方」が正解','選択肢Dの検証：「新製品を発売していないが、市場調査は実施している可能性がある」→ 対偶の連鎖でA社の市場調査なしは確定。可能性はゼロ ✗'],traps:['A「新製品を発売していない」のみ選択：正しい結論だが不完全。Bも同時に導ける','B「市場調査を実施していない」のみ選択：同上。Aも導けるのでCが正解','D「市場調査は実施している可能性がある」：対偶P2（競合分析なし→市場調査なし）で市場調査未実施は確定済み。可能性ではなく確実に未実施'],tip:'論理関係の鉄則：対偶「P→QならQ→¬P」を即座に書き出す。2つ以上の前提があるときは対偶を連鎖させて結論を導く。本問の推論チェーン：競合分析なし →（P2対偶）→ 市場調査なし →（P1対偶）→ 新製品なし。'}},
+  {id:5,category:'非言語',subtype:'割合・複数段階',text:'ある商品を定価の10%引きで販売したが売れ残り、さらにその価格から25%引きにして全て売り切った。最終売値は原価の81%だった。定価は原価の何%か。',choices:['110%','115%','120%','125%'],answer:2,explanation:{summary:'正答: C（120%）。定価に10%引きと25%引きを順にかけると0.90×0.75=0.675。最終売値=原価×0.81より、定価×0.675=原価×0.81。原価=100とおくと定価=120。',steps:['設定：原価=100とする。定価=xとおく','1段目の値引き：定価の10%引き → 販売価格1 = x × 0.90','2段目の値引き：販売価格1の25%引き → 最終売値 = x × 0.90 × 0.75 = x × 0.675','条件：最終売値 = 原価の81% → x × 0.675 = 100 × 0.81 = 81','定価を求める：x = 81 ÷ 0.675。分数で計算すると 0.675 = 27/40 なので x = 81 × 40/27 = 3240/27 = 120','検算：定価120 × 0.90 = 108（10%引き）→ 108 × 0.75 = 81（25%引き）→ 原価100の81% ✓','したがって定価は原価の120%'],traps:['A(110%)：検算すると 110×0.675=74.25 ≠ 81。合成係数の計算を間違えた場合','B(115%)：10%と25%を足して「35%引き」とし、定価×0.65=81 → 定価≒124.6と計算。割引率の加算は不正解。多段割引は足すのではなく掛ける','D(125%)：検算すると 125×0.675=84.375 ≠ 81。0.675を0.65と誤計算した場合に出やすい'],tip:'多段割引は「掛け算で合成」が鉄則。10%引きと25%引きは0.90×0.75=0.675であり、35%引き(0.65)ではない。分数で計算すると速い：9/10 × 3/4 = 27/40。'}},
+  {id:6,category:'非言語',subtype:'仕事算',text:'ある仕事をAが1人で行うと30日、Bが1人で行うと20日、Cが1人で行うと12日かかる。最初はAとBの2人で仕事を始め、6日後にCが加わって3人で仕事を続けた。仕事全体が完了するのは最初から何日目か。',choices:['7日目','8日目','9日目','10日目'],answer:2,explanation:{summary:'正答: C（9日目）。仕事全体をLCM(30,20,12)=60とすると、A=2/日、B=3/日、C=5/日。前半6日でA+Bが30完了、残り30を3人(10/日)で3日。合計9日目。',steps:['仕事の整数化：A(30日),B(20日),C(12日)の最小公倍数 LCM(30,20,12)=60 を仕事全体とする','1日あたりの作業量：A=60÷30=2/日、B=60÷20=3/日、C=60÷12=5/日','前半（A+Bの2人で6日間）：(2+3)×6 = 5×6 = 30','残りの仕事量：60−30 = 30','後半（A+B+Cの3人）：1日あたり 2+3+5 = 10。必要日数 = 30÷10 = 3日','合計：前半6日 + 後半3日 = 9日目','検算：6日間のA+B作業量30 + 3日間のA+B+C作業量30 = 60（全体）✓'],traps:['A(7日目)：前半を3日と誤計算した場合。問題文の「6日後にCが加わって」を正確に読む','D(10日目)：C参加後もA+Bの速度(5/日)で計算し、残り30÷5=6日、合計12日とするミス。C参加後は3人の合計10/日','B(8日目)：LCMの計算を間違えた場合。LCM(30,20,12)=60を確認'],tip:'仕事算の鉄則：①全員の日数のLCMを仕事全体とする → ②各人の1日あたり作業量を整数で算出 → ③期間ごとに分けて計算。LCM法を使えば分数計算がゼロになり、計算ミスが激減する。'}},
+  {id:7,category:'非言語',subtype:'場合の数',text:'男子4人・女子3人の計7人から4人を選んで一列に並べる。両端（1番目と4番目）がどちらも男子になる並べ方は何通りか。',choices:['200通り','220通り','240通り','260通り'],answer:2,explanation:{summary:'正答: C（240通り）。両端に男子を配置（₄P₂=12通り）、残り2席に5人から2人を順列で配置（₅P₂=20通り）。12×20=240通り。',steps:['問題の整理：7人(男4女3)から4人を選んで一列に並べる。両端（1番目と4番目）が男子という制約つき','制約のある席を先に埋める：1番目に男子を選ぶ → 4人から1人 = 4通り','4番目に男子を選ぶ：残り男子3人から1人 = 3通り','両端の男子の配置：4 × 3 = ₄P₂ = 12通り','中の2席（2番目と3番目）：両端に使った2人以外の残り5人（男子2人＋女子3人）から2人を選んで並べる','中2席の計算：5 × 4 = ₅P₂ = 20通り（1人目5通り×2人目4通り）','合計：12 × 20 = 240通り'],traps:['A(200通り)：中2席の計算で₅C₂=10（組合せ）を使ってしまい、12×10=120としたり、別の計算ミスで200になるケース。一列に並べるので「順列」₅P₂=20が正しい','B(220通り)：計算過程のどこかで+10のずれ。確認用：12×20=240','D(260通り)：1番目の男子選択で男女区別なく7人から選び始めるなどの構造的ミス'],tip:'場合の数の鉄則：①制約がある席を先に埋める（本問は両端） → ②残りの席を自由に埋める。「並べる」なら順列P、「選ぶだけ」なら組合せC。一列に並べる問題では必ず順列Pを使う。'}},
+  {id:8,category:'非言語',subtype:'推論',text:'A, B, C, D, Eの5人が円形のテーブルに等間隔で座っている。以下の条件がすべて成り立つとき、確実に言えることを選べ。（回転を区別しない）\n\n・AはBの隣に座っていない\n・CはDの隣に座っている\n・EはAの隣に座っている',choices:['AはCの隣に座っている','BはEの隣に座っている','CはEの隣に座っている','BはDの隣に座っている'],answer:1,explanation:{summary:'正答: B（BはEの隣に座っている）。Aを固定して全パターンを列挙すると4通り。いずれもBとEが隣接するため、確実に言える。',steps:['円形の固定：回転を区別しないため、Aを位置1に固定。5つの席を1,2,3,4,5とし、隣接は1-2, 2-3, 3-4, 4-5, 5-1','条件3「EはAの隣」→ E∈{2, 5}。条件2「CはDの隣」→ CDは隣接ペア。条件1「AはBの隣でない」→ B∉{2, 5}','ケース1（E=2）：B≠1(=A),B≠2(=E)で条件1よりB≠5 → B∈{3,4}。CDは隣接 → 残り席にCDを配置','E=2,B=3の場合：残りC,Dは4,5。CD隣接 → C=4,D=5 or C=5,D=4。条件「CDの隣」を満たす → 2パターン','E=2,B=4の場合：残りC,Dは3,5。3と5は隣接しない(円形で3-4-5なので3と5は隣接しない) → CD隣接不成立 ✗','ケース2（E=5）：対称的にB∈{3,4}。B=4の場合CD→{2,3}隣接 ✓（2パターン）。B=3の場合CD→{2,4}隣接不成立 ✗','有効な全4パターン：①A-E-B-C-D ②A-E-B-D-C ③D-C-B-E-A の逆 ④C-D-B-E-A の逆。全てでBとEが隣接 ✓'],traps:['A「AはCの隣」：パターン①ではA=1,C=4で隣接しない。一部パターンで不成立のため「確実に」言えない','C「CはEの隣」：パターン①ではC=4,E=2で隣接しない。不確実','D「BはDの隣」：パターン①ではB=3,D=5で隣接しない。不確実'],tip:'円形推論の解法：①1人を固定 → ②条件の厳しい順に配置（隣接条件→非隣接条件） → ③全パターンを列挙 → ④全パターンで共通する性質が「確実に言える」答え。パターン数が少ない場合（本問は4通り）は全列挙が最速。'}},
+  {id:9,category:'並べ替え',subtype:'5文並べ替え',text:'次のア～オを並べ替えて、意味の通る文章にしたとき、3番目にくるものを選べ。\n\nア：個人の競争心を刺激する評価制度は短期的な成果を生みやすい\nイ：組織の持続的な成長には、こうした構造的課題への対処が欠かせない\nウ：しかしその反面、協働を阻害し知識の囲い込みを招くことがある\nエ：成果主義の是非を論じる際、単純に賛否を決めることは難しい\nオ：構成員が成果を独占しようとするため、組織全体の学習速度が落ちるからだ',choices:['ア','イ','ウ','エ'],answer:2,explanation:{summary:'正答: C（ウ）。正しい順序は エ→ア→ウ→オ→イ。3番目はウ。接続語・指示語をたどると一意に決まる。',steps:['手がかり1「しかしその反面」（ウ）：逆接→直前に肯定的な内容が必要。ア「短期的な成果を生みやすい」が該当 → ア→ウ','手がかり2「からだ」（オ）：理由を述べる文末。直前の文の理由づけ。ウ「知識の囲い込みを招く」の理由がオ「成果を独占しようとするため」 → ウ→オ','手がかり3「こうした構造的課題」（イ）：指示語「こうした」は直前の内容を受ける。オ「組織全体の学習速度が落ちる」=構造的課題 → オ→イ','残りのエ「成果主義の是非を論じる際…」：話題を導入する文。具体論に入る前の総論 → 先頭に配置','確定した順序：エ→ア→ウ→オ→イ。3番目=ウ','通し読み確認：「成果主義の是非は単純でない(エ)→競争心は短期成果を生む(ア)→しかし協働を阻害(ウ)→成果独占で学習速度低下(オ)→構造的課題への対処が必要(イ)」✓'],traps:['エを後半に置く：「成果主義の是非を論じる際」は話題設定文であり、論点を提起する機能。必ず先頭。話題提起文を中盤に置くと論理が破綻する','オをウの前に置く：「からだ」は理由を述べる文末表現であり、直前の文（結論）の後に来る。理由→結論ではなく結論→理由の順が日本語の自然な流れ','アを3番目と誤答：「しかしその反面」のウがアの直後に来ることを見落とすと、順序が崩れる'],tip:'並べ替えの手順：①接続語（しかし/ところが/また）で前後関係を特定 → ②理由文（からだ/ためだ）を直前の文に接続 → ③指示語（こうした/この/それは）の指示先を特定 → ④話題導入文を先頭に配置。この4ステップで大半の並べ替えが解ける。'}},
+  {id:10,category:'並べ替え',subtype:'5文並べ替え',text:'次のア～オを並べ替えて、意味の通る文章にしたとき、3番目にくるものを選べ。\n\nア：ところが現代では、都市への人口集中が加速しその構造は崩壊しつつある\nイ：地方共同体は長らく、互助と相互監視を両立した独自のガバナンスを維持してきた\nウ：住民同士の顔が見える関係が、非公式なルールの遵守を支えていたためである\nエ：この空白を埋める新たな社会設計の枠組みを構築することが急務となっている\nオ：匿名性の高い都市空間では、従来の非公式な規範が機能しにくくなっている',choices:['ア','イ','ウ','エ'],answer:0,explanation:{summary:'正答: A（ア）。正しい順序は イ→ウ→ア→オ→エ。3番目はア。時間軸（過去→現代→課題）に沿って配列される。',steps:['時間軸の手がかり：イ「長らく」（過去）、ア「現代では」（現在）、エ「急務となっている」（未来への提言） → 大枠の時間軸を特定','手がかり1「ためである」（ウ）：理由文。イ「独自のガバナンスを維持してきた」の理由がウ「住民同士の顔が見える関係が支えていた」 → イ→ウ','手がかり2「ところが現代では」（ア）：逆接。過去の話の後に現代の変化を述べる → ウ→ア。「ところが」は直前に対立する内容が必要','手がかり3「従来の非公式な規範」（オ）：アで述べた「構造の崩壊」の具体的影響を展開 → ア→オ','手がかり4「この空白」（エ）：指示語「この」はオで述べた「規範が機能しなくなった」状況を指す → オ→エ','確定した順序：イ→ウ→ア→オ→エ。3番目=ア','通し読み確認：「地方共同体は互助のガバナンスを維持(イ)→顔の見える関係が支えていた(ウ)→ところが都市集中で崩壊(ア)→都市では規範が機能しない(オ)→新たな社会設計が急務(エ)」✓'],traps:['アを先頭に置く：「ところが」は逆接の接続語で、直前に対立する内容が必要。文章の冒頭には使えない。先頭は話題導入のイ','イとウの順序を逆にする：「ためである」は直前の文に対する理由づけ。ウ→イとすると「理由→結論」の順になり、日本語では不自然（通常は「結論→理由(ためだ)」）'],tip:'時間軸型の並べ替えパターン：「過去の状態（長らく/かつて）→ 転換点（ところが/しかし現代では）→ 現在の問題（〜になっている）→ 将来の提言（急務/べきだ）」。このパターンを知っていれば時間表現だけで大枠を組める。'}},
+  {id:11,category:'確率',subtype:'余事象',text:'赤玉4個、白玉3個、青玉2個が入った袋から3個の玉を同時に取り出す。少なくとも2色が含まれる確率を求めよ。',choices:['79/84','37/42','5/6','13/14'],answer:0,explanation:{summary:'正答: A（79/84）。「少なくとも2色」の余事象は「1色のみ」。全₉C₃=84通り中、1色のみは赤₄C₃=4、白₃C₃=1、青₂C₃=0の計5通り。P=1−5/84=79/84。',steps:['余事象の特定：「少なくとも2色が含まれる」の余事象は「1色のみ（全て同色）」。P=1−P(1色のみ)','全体の場合の数：₉C₃ = 9!/(3!×6!) = (9×8×7)/(3×2×1) = 504/6 = 84通り','1色のみのケース①赤だけ3個：₄C₃ = 4通り（赤が4個あるので3個選ぶ組合せ）','1色のみのケース②白だけ3個：₃C₃ = 1通り（白3個をすべて選ぶ）','1色のみのケース③青だけ3個：₂C₃ = 0通り（青は2個しかないので3個は選べない）','余事象の合計：4 + 1 + 0 = 5通り','求める確率：P = 1 − 5/84 = 79/84','検算：79/84を約分 → GCD(79,84)=1（79は素数）→ 既約分数 ✓'],traps:['B(37/42)：37/42 = 74/84。余事象を10通りと誤計算。白₃C₃=1を見落として青₂C₃を何かと混同した可能性','C(5/6)：5/6 = 70/84。余事象を14通りと誤計算した場合。全体の場合の数を間違えた可能性','D(13/14)：13/14 = 78/84。余事象を6通りと計算。青₂C₃=0を1通りと誤って数えた場合（2個から3個は選べないのに1通りとカウント）'],tip:'「少なくとも○○」問題は必ず余事象を使う。直接計算だと「2色」「3色」の場合分けが複雑になるが、余事象「1色のみ」は各色のC(n,3)を足すだけ。₂C₃=0（選べない）に注意。'}},
+  {id:12,category:'確率',subtype:'条件付き確率',text:'A袋には赤玉3個・白玉2個、B袋には赤玉2個・白玉4個が入っている。コインを投げ、表が出たらA袋から、裏が出たらB袋から玉を1個取り出す。取り出した玉が赤玉だったとき、それがA袋から取り出されたものである確率を求めよ。',choices:['9/14','9/19','3/7','3/5'],answer:0,explanation:{summary:'正答: A（9/14）。ベイズの定理を適用。A袋から赤を引く確率=1/2×3/5=3/10。B袋から赤を引く確率=1/2×1/3=1/6。赤全体=7/15。P(A袋|赤)=(3/10)÷(7/15)=9/14。',steps:['問題の整理：2段階の確率。①コイン投げ（A袋/B袋を選ぶ）→ ②選んだ袋から玉を引く。「赤が出た」という結果から「A袋だった」確率を逆算する','樹形図で経路確率を計算：','経路1：コイン表(1/2) → A袋(赤3白2) → 赤を引く(3/5) → 合成確率 = 1/2 × 3/5 = 3/10','経路2：コイン裏(1/2) → B袋(赤2白4) → 赤を引く(2/6=1/3) → 合成確率 = 1/2 × 1/3 = 1/6','赤が出る全体の確率：3/10 + 1/6 = 9/30 + 5/30 = 14/30 = 7/15','ベイズの定理を適用：P(A袋|赤) = P(A袋かつ赤) / P(赤) = (3/10) / (7/15) = 3/10 × 15/7 = 45/70 = 9/14','検算：P(B袋|赤) = (1/6) / (7/15) = 1/6 × 15/7 = 15/42 = 5/14。P(A|赤)+P(B|赤) = 9/14 + 5/14 = 14/14 = 1 ✓'],traps:['B(9/19)：分母の計算ミス。赤全体の確率を3/10+1/6=19/30と足し算ミスした場合','C(3/7)：3/10を3/5と間違えた（コインの1/2を掛け忘れ）場合のベイズ計算結果','D(3/5)：P(赤|A)=3/5をそのまま答えるミス。条件付き確率の方向を逆にしている。P(赤|A)≠P(A|赤)。ベイズの定理が必要な理由'],tip:'条件付き確率（ベイズ）の解法：①樹形図を描いて各経路の合成確率を計算 → ②求めたい結果（赤）に至る全経路の確率を合算 → ③特定経路の確率÷全経路の確率。検算としてP(A|赤)+P(B|赤)=1を確認すると安心。'}}
+];
+
+// Normalize SET1 to common format
+function normalizeSet1(raw) {
+  const labels = ['A','B','C','D'];
+  return raw.map(q => {
+    let html = '';
+    const textParts = q.text.split('\n');
+    html += textParts[0];
+    if (q.blockquote) html += `<div class="q-blockquote">${esc(q.blockquote)}</div>`;
+    if (q.premise) html += `<div class="q-premise">${esc(q.premise).replace(/\n/g,'<br>')}</div>`;
+    if (textParts.length > 1) {
+      const extra = textParts.slice(1).join('\n').trim();
+      if (extra) html += '<br>' + esc(extra).replace(/\n/g,'<br>');
+    }
+    // Build explanation HTML
+    const e = q.explanation;
+    let expl = `<p><strong>${esc(e.summary)}</strong></p>`;
+    expl += '<h4>解法ステップ</h4><ol>';
+    e.steps.forEach(s => expl += `<li>${esc(s)}</li>`);
+    expl += '</ol><h4>誤答の罠</h4><ul>';
+    e.traps.forEach(t => expl += `<li>${esc(t)}</li>`);
+    expl += '</ul>';
+    expl += `<div class="tip">時短テクニック：${esc(e.tip)}</div>`;
+    return {
+      id: q.id, category: q.category, subcategory: q.subtype,
+      question: html,
+      choices: q.choices.map((c,i) => ({label: labels[i], text: c})),
+      answer: labels[q.answer],
+      explanation: expl
+    };
+  });
+}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+const SET1 = normalizeSet1(SET1_RAW);
+
+// ===== SET2 DATA =====
+const SET2 = REPLACE_SET2_INLINE();
+function REPLACE_SET2_INLINE() { return [
+  {id:13,category:"順序確定",subcategory:"5人の一列並び",question:`P, Q, R, S, T の5人が左から1番目〜5番目に一列に並んでいる。<br>以下の条件がすべて成り立つとき、確実に言えることを選べ。<ul><li>条件1：Sは1番目ではない</li><li>条件2：QはRのすぐ左隣にいる</li><li>条件3：PはTより左にいて、PとTの間にはちょうど2人いる</li></ul>`,choices:[{label:"A",text:"Qは2番目にいる"},{label:"B",text:"Sは4番目にいる"},{label:"C",text:"Rは4番目にいる"},{label:"D",text:"Tは3番目にいる"}],answer:"A",explanation:`<p><strong>正答: A（Qは2番目にいる）</strong></p><h4>解法ステップ</h4><ol><li><strong>条件3の分析：</strong>「PはTより左にいて、間にちょうど2人」→ PとTは3つ離れた位置にいる。5つの席で可能な組み合わせは <strong>P=1,T=4</strong> か <strong>P=2,T=5</strong> の2通りのみ。</li><li><strong>ケース1（P=1, T=4）：</strong>残りの位置2,3,5にQ,R,Sが入る。条件2「QはRのすぐ左隣」より、QRは連続位置に配置 → QR=(2,3)が唯一の可能性。残るS=5番目。条件1「Sは1番目ではない」を確認 → S=5 ✓ 成立。<br>確定配置: <strong>P(1), Q(2), R(3), T(4), S(5)</strong></li><li><strong>ケース2（P=2, T=5）：</strong>残りの位置1,3,4にQ,R,Sが入る。QRは連続位置が必要 → QR=(3,4)のみ可能。残るS=1番目。条件1「Sは1番目ではない」→ S=1 ✗ <strong>条件違反で不成立！</strong></li><li><strong>結論：</strong>有効な配置はケース1のみ。唯一の確定配置でQ=2番目。</li></ol><h4>各選択肢の分析</h4><ul><li><strong>A「Qは2番目」→ ✓ 正解。</strong>唯一の有効配置でQ=2番目が確定する。</li><li>B「Sは4番目」→ ✗ Sは5番目。4番目はT。</li><li>C「Rは4番目」→ ✗ Rは3番目。4番目はT。</li><li>D「Tは3番目」→ ✗ Tは4番目。3番目はR。</li></ul><h4>よくある誤答</h4><p>ケース2（P=2,T=5）を条件1で除外し忘れ、複数の配置があると思い込んで「確実に言えるものがない」と悩むパターンが典型的。<strong>すべての条件を同時に満たすか</strong>を必ず検証すること。</p><div class="tip">順序確定のコツ：制約が最も厳しい条件（ここでは「ちょうど2人挟む」）から場合分けし、残りの条件で絞り込む。配置パターンが2通りしかなければ、片方が条件違反で一意に決まることが多い。</div>`},
+  {id:14,category:"順序確定",subcategory:"6人の一列並び",question:`A〜Fの6人が一列に並ぶ。以下の条件で4番目の人を選べ。<ul><li>AはBのすぐ左隣</li><li>CはDのすぐ左隣</li><li>E=左端、F=右端</li><li>AはCより左</li></ul>`,choices:[{label:"A",text:"A"},{label:"B",text:"B"},{label:"C",text:"C"},{label:"D",text:"D"}],answer:"C",explanation:`<p><strong>正答: C（4番目はC）</strong></p><h4>解法ステップ</h4><ol><li><strong>固定位置の確認：</strong>条件3「E=左端、F=右端」より、E=1番目、F=6番目が確定。残りの位置2,3,4,5にA,B,C,Dを配置する。</li><li><strong>ブロック化：</strong>条件1「AはBのすぐ左隣」→ ABは連続ブロック。条件2「CはDのすぐ左隣」→ CDも連続ブロック。2つの2人ブロックを4つの席（2,3,4,5）に入れる方法は2通り。</li><li><strong>ケース1：AB=(2,3), CD=(4,5)</strong><br>A=2, B=3, C=4, D=5。条件4「AはCより左」→ A(2) &lt; C(4) ✓ 成立。<br>確定配置: <strong>E(1), A(2), B(3), C(4), D(5), F(6)</strong></li><li><strong>ケース2：AB=(4,5), CD=(2,3)</strong><br>A=4, B=5, C=2, D=3。条件4「AはCより左」→ A(4) &gt; C(2) ✗ <strong>条件違反！</strong></li><li><strong>結論：</strong>ケース1のみ有効。4番目=C。</li></ol><h4>各選択肢の分析</h4><ul><li>A「A」→ ✗ Aは2番目。</li><li>B「B」→ ✗ Bは3番目。</li><li><strong>C「C」→ ✓ 正解。</strong>Cは4番目。</li><li>D「D」→ ✗ Dは5番目。</li></ul><h4>よくある誤答</h4><p>ABとCDのブロック配置を2通りとも検証せず、どちらか一方だけで判断してしまうケース。また、「AはCより左」の条件を見落として2通りの解が存在すると考え、確実に言えないと判断するミスも多い。</p><div class="tip">ブロック型の順序確定では、①固定位置を確定 → ②ブロックの配置パターンを列挙 → ③残りの条件で絞り込む、の3ステップが定石。ブロック数と空き席数が等しいときは配置パターンが少なく、高速で解ける。</div>`},
+  {id:15,category:"順序確定",subcategory:"5人の円卓",question:`J,K,L,M,Nの5人が円卓に座る。確実に隣り合う組を選べ。<ul><li>JはMの隣</li><li>KはMの隣</li><li>LはJの隣でない</li></ul>`,choices:[{label:"A",text:"JとL"},{label:"B",text:"KとN"},{label:"C",text:"KとL"},{label:"D",text:"LとM"}],answer:"C",explanation:`<p><strong>正答: C（KとL）</strong></p><h4>解法ステップ</h4><ol><li><strong>円卓の固定：</strong>円形の席順では回転を区別しないため、Jを位置1に固定する。5つの席を1,2,3,4,5とすると、隣り合う席は「1-2」「2-3」「3-4」「4-5」「5-1」。</li><li><strong>条件1「JはMの隣」：</strong>J=1の隣は位置2と位置5。よって M∈{2, 5} の2通り。</li><li><strong>ケース1（M=2）：</strong><br>条件2「KはMの隣」→ M(2)の隣は位置1(=J)と位置3。J以外ではK=3。<br>条件3「LはJの隣でない」→ J(1)の隣は位置2(=M)と位置5。Lは位置5に入れない → L=4。<br>残るN=5。<br>配置: J(1)-M(2)-<strong>K(3)-L(4)</strong>-N(5)<br>→ K(3)とL(4)は隣接 ✓</li><li><strong>ケース2（M=5）：</strong><br>条件2「KはMの隣」→ M(5)の隣は位置4と位置1(=J)。J以外ではK=4。<br>条件3「LはJの隣でない」→ J(1)の隣は位置2と位置5(=M)。Lは位置2に入れない → L=3。<br>残るN=2。<br>配置: J(1)-N(2)-<strong>L(3)-K(4)</strong>-M(5)<br>→ K(4)とL(3)は隣接 ✓</li><li><strong>結論：</strong>全てのパターンでKとLは必ず隣接する。</li></ol><h4>各選択肢の分析</h4><ul><li>A「JとL」→ ✗ ケース1: J=1,L=4（間にM,Kがいて隣接しない）。ケース2: J=1,L=3（間にNがいて隣接しない）。いずれも不成立。</li><li>B「KとN」→ ✗ ケース1: K=3,N=5（間にLがいて隣接しない）。ケース2: K=4,N=2（間にLがいて隣接しない）。いずれも不成立。</li><li><strong>C「KとL」→ ✓ 正解。</strong>両ケースとも隣接が確定。</li><li>D「LとM」→ ✗ ケース1: L=4,M=2（隣接しない）。ケース2: L=3,M=5（隣接しない）。いずれも不成立。</li></ul><h4>よくある誤答</h4><p>円卓問題で全パターンを列挙せず、1つのケースだけで判断してしまうのが典型的ミス。「確実に言える」ためには<strong>すべてのパターン</strong>で成立する必要がある。</p><div class="tip">円卓の鉄則：①1人を固定して回転の重複を排除 → ②「隣」の条件から配置を制約 → ③残った席に「隣でない」条件を適用 → ④全パターンで共通する性質を探す。</div>`},
+  {id:16,category:"順序確定",subcategory:"作業の実行順",question:`W,X,Y,Zの4作業の依存関係から3番目の作業を選べ。<ul><li>W←X（Xの後にW）</li><li>Y←W（Wの後にY）</li><li>W←Z（Zの後にW）</li></ul>`,choices:[{label:"A",text:"X"},{label:"B",text:"Y"},{label:"C",text:"W"},{label:"D",text:"Z"}],answer:"C",explanation:`<p><strong>正答: C（W）</strong></p><h4>解法ステップ</h4><ol><li><strong>依存関係の整理：</strong>矢印表記「A←B」は「Bの後にA」を意味する（BがAの前提条件）。<br>・W←X → <strong>X → W</strong>（XはWより先）<br>・Y←W → <strong>W → Y</strong>（WはYより先）<br>・W←Z → <strong>Z → W</strong>（ZはWより先）</li><li><strong>依存グラフの構築：</strong><br>X → W → Y<br>Z → W → Y<br>つまり、XとZはどちらもWの前に完了する必要があり、Yは最後。</li><li><strong>順序の確定：</strong><br>・1番目と2番目: XとZ（どちらが先でもよい＝順不同）<br>・3番目: <strong>W</strong>（XとZ両方が完了してから実行）<br>・4番目: <strong>Y</strong>（Wが完了してから実行）</li></ol><h4>各選択肢の分析</h4><ul><li>A「X」→ ✗ Xは1番目または2番目。3番目ではない。</li><li>B「Y」→ ✗ Yは最後（4番目）。WがYの前提条件。</li><li><strong>C「W」→ ✓ 正解。</strong>XとZの両方がWの前提なのでWは最速でも3番目。Yが後ろに控えるため3番目で確定。</li><li>D「Z」→ ✗ Zは1番目または2番目。3番目ではない。</li></ul><h4>よくある誤答</h4><p>矢印「W←X」の読み方を「WのあとにX」と逆に解釈してしまうミスが最多。問題文の「Xの後にW」という説明を正確に読み取ることが重要。また、XとZの順序が確定しないことに戸惑い、Wの位置も不確定と誤判断するケースもある。</p><div class="tip">作業順序の問題では、①依存関係を矢印グラフに変換 → ②入力がない作業（先頭候補）と出力がない作業（末尾候補）を特定 → ③中間の位置を確定、が基本手順。前提条件が2つある作業は、両方完了後にしか実行できない。</div>`},
+  {id:17,category:"語句用法",subcategory:"手を打つ",question:`「万一に備えて早めに<strong>手を打って</strong>おいた」と最も近い用法を選べ。`,choices:[{label:"A",text:"そのニュースを聞いて思わず手を打った"},{label:"B",text:"被害が広がる前に手を打つ必要がある"},{label:"C",text:"二人は互いに譲歩して手を打った"},{label:"D",text:"茶道の作法として手を打つ場面がある"}],answer:"B",explanation:`<p><strong>正答: B（被害が広がる前に手を打つ必要がある）</strong></p><h4>問題文の用法分析</h4><p>「万一に備えて早めに<strong>手を打って</strong>おいた」<br>→ この「手を打つ」は<strong>「対策を講じる・事前に策を実行する」</strong>という比喩的用法。具体的には、将来のリスクに対して予防的な行動をとるという意味。</p><h4>各選択肢の分析</h4><ul><li>A「そのニュースを聞いて思わず手を打った」<br>→ <strong>物理動作（拍手・手を叩く）。</strong>驚きや喜びの感情表現として両手を叩く動作。比喩ではなく字義通りの意味。</li><li><strong>B「被害が広がる前に手を打つ必要がある」→ ✓ 正解。</strong><br>→ <strong>「対策を講じる」</strong>の用法。問題文と同様に、事態が悪化する前に予防措置をとるという比喩的意味。「備えて…打つ」と「広がる前に…打つ」で構文パターンも類似。</li><li>C「二人は互いに譲歩して手を打った」<br>→ <strong>「妥協する・合意に至る」</strong>の用法。交渉の場面で双方が歩み寄って決着をつけるという意味。対策とは異なり「合意形成」のニュアンス。</li><li>D「茶道の作法として手を打つ場面がある」<br>→ <strong>物理動作（儀礼的に手を叩く）。</strong>Aと同じく字義通りの意味だが、意図的・様式的な動作。</li></ul><h4>よくある誤答</h4><p>CとBを迷うケースが多い。Cの「手を打つ」は「妥協・決着」の意味であり、問題文の「予防的対策」とは文脈が異なる。問題文は<strong>一方的に策を講じる</strong>行為、Cは<strong>双方の合意</strong>という点で判別可能。</p><div class="tip">語句用法の鉄則：同じ慣用句でも①物理動作 vs 比喩、②比喩の中でも意味が異なる場合がある。「手を打つ」は「対策」「妥協」「拍手」の3パターンを押さえておくと即答できる。</div>`},
+  {id:18,category:"語句用法",subcategory:"立つ",question:`「理事長の面目が<strong>立つ</strong>ような解決策を考えてほしい」と最も近い用法を選べ。`,choices:[{label:"A",text:"湖面に霧が立った"},{label:"B",text:"彼女の発言がひときわ目立った"},{label:"C",text:"急に立つとめまいがした"},{label:"D",text:"この計画はまだ見通しが立たない"}],answer:"D",explanation:`<p><strong>正答: D（この計画はまだ見通しが立たない）</strong></p><h4>問題文の用法分析</h4><p>「理事長の面目が<strong>立つ</strong>ような解決策を考えてほしい」<br>→ この「立つ」は<strong>「成り立つ・維持される・確保される」</strong>という抽象的用法。「面目が立つ」＝体面・名誉が保たれる。何かが抽象的に「成立する・確立する」という意味。</p><h4>各選択肢の分析</h4><ul><li>A「湖面に霧が立った」<br>→ <strong>自然現象としての「発生する・生じる」。</strong>霧や煙が物理的に空間に現れる様子。「立ち上る」に近い用法であり、抽象的な成立とは異なる。</li><li>B「彼女の発言がひときわ目立った」<br>→ <strong>複合語「目立つ」</strong>の一部。「目」+「立つ」で「他より際立って見える」という独立した語になっており、「立つ」単独の用法とは異なる。語句用法の問題では複合語は別扱い。</li><li>C「急に立つとめまいがした」<br>→ <strong>物理動作としての「起立する・立ち上がる」。</strong>身体を起こす動作であり、最も基本的な字義通りの意味。</li><li><strong>D「この計画はまだ見通しが立たない」→ ✓ 正解。</strong><br>→ <strong>「成り立つ・確立される」</strong>の用法。「見通しが立つ」＝将来の見通しが確立・形成される。問題文の「面目が立つ」と同じく、<strong>抽象的なものが成立・確保される</strong>という構造が一致。</li></ul><h4>よくある誤答</h4><p>Aの「霧が立つ」を選ぶケース。一見「何かが生じる」という点で似て見えるが、Aは物理現象の発生であり、問題文は抽象概念の成立。<strong>「○○が立つ」の○○が具体物か抽象概念かで判別</strong>するとよい。</p><div class="tip">「立つ」の多義語パターン：①物理的起立（体が立つ）、②自然現象の発生（霧が立つ）、③抽象概念の成立（面目/見通し/計画が立つ）、④複合語の一部（目立つ/役立つ）。SPIでは③の用法がよく出題される。</div>`},
+  {id:19,category:"語句用法",subcategory:"引く",question:`「彼の大胆な提案が会場の注目を<strong>引いた</strong>」と最も近い用法を選べ。`,choices:[{label:"A",text:"子どもの好奇心を引く展示が人気だ"},{label:"B",text:"辞書で知らない単語を引く"},{label:"C",text:"潮が引いて岩場が姿を見せた"},{label:"D",text:"風邪を引いて三日間寝込んだ"}],answer:"A",explanation:`<p><strong>正答: A（子どもの好奇心を引く展示が人気だ）</strong></p><h4>問題文の用法分析</h4><p>「彼の大胆な提案が会場の注目を<strong>引いた</strong>」<br>→ この「引く」は<strong>「引きつける・惹きつける（attract）」</strong>という比喩的用法。人の関心や注意を自分の方に向けさせるという意味。「注目を引く」は頻出コロケーション。</p><h4>各選択肢の分析</h4><ul><li><strong>A「子どもの好奇心を引く展示が人気だ」→ ✓ 正解。</strong><br>→ <strong>「引きつける」</strong>の用法。「好奇心を引く」＝好奇心を惹きつける。問題文の「注目を引く」と同じく、<strong>「人の心理的関心を引き寄せる」</strong>という構造が完全に一致。</li><li>B「辞書で知らない単語を引く」<br>→ <strong>「調べる・検索する（look up）」</strong>の用法。辞書のページを物理的にめくって探すことから転じた意味。心理的な引力とは無関係。</li><li>C「潮が引いて岩場が姿を見せた」<br>→ <strong>「退く・後退する（recede）」</strong>の用法。水位が下がっていく物理的な移動を指す。方向が「こちらへ」ではなく「離れる」であり、問題文と逆のベクトル。</li><li>D「風邪を引いて三日間寝込んだ」<br>→ <strong>「かかる・罹患する（catch）」</strong>の用法。「風邪を引く」は慣用表現として定着しており、引きつけるとは全く異なる語義。</li></ul><h4>よくある誤答</h4><p>Bの「辞書を引く」はよく使う表現のため選びがちだが、問題文の「引く」のベクトル（注意を自分に向けさせる）と「辞書を引く」（情報を探し出す）はメカニズムが異なる。<strong>「○○を引く」の○○が心理的なものか具体的なものか</strong>で判別するとよい。</p><div class="tip">「引く」の多義語パターン：①物理的に引っ張る、②引きつける/惹きつける（注目/関心を引く）、③退く（潮が引く/手を引く）、④調べる（辞書を引く）、⑤罹患する（風邪を引く）、⑥線を描く（線を引く）。②は「心理→自分の方へ」のベクトルが特徴。</div>`},
+  {id:20,category:"語句用法",subcategory:"つく",question:`「長年の修練を経て、ようやく自信が<strong>ついた</strong>」と最も近い用法を選べ。`,choices:[{label:"A",text:"評判に傷がついた"},{label:"B",text:"ようやく決心がついた"},{label:"C",text:"子どもの頃から体力がついている選手だ"},{label:"D",text:"新しい役職についた"}],answer:"C",explanation:`<p><strong>正答: C（子どもの頃から体力がついている選手だ）</strong></p><h4>問題文の用法分析</h4><p>「長年の修練を経て、ようやく自信が<strong>ついた</strong>」<br>→ この「つく」は<strong>「備わる・身につく・蓄積して定着する」</strong>という用法。長い時間をかけて能力や性質が徐々に積み上がり、定着した状態になることを指す。ポイントは<strong>「時間経過による漸進的な獲得・定着」</strong>というニュアンス。</p><h4>各選択肢の分析</h4><ul><li>A「評判に傷がついた」<br>→ <strong>「付着する・くっつく」</strong>の用法。何かの表面に別のものがくっつく比喩。傷が評判に「付いた」のは瞬間的な出来事であり、時間をかけた蓄積ではない。</li><li>B「ようやく決心がついた」<br>→ <strong>「確定する・決まる」</strong>の用法。迷っていた状態から結論が定まること。「ようやく」は共通するが、長期的な蓄積ではなく<strong>ある時点での確定</strong>を指す。自信は「育つ」ものだが、決心は「固まる」もの。</li><li><strong>C「子どもの頃から体力がついている選手だ」→ ✓ 正解。</strong><br>→ <strong>「備わる・身につく」</strong>の用法。子どもの頃からの長い年月を通じて体力が蓄積・定着している状態。問題文の「長年の修練を経て自信がついた」と同じく、<strong>時間経過による漸進的な獲得・定着</strong>という構造が一致。</li><li>D「新しい役職についた」<br>→ <strong>「就任する（就く）」</strong>の用法。漢字で書くと「就いた」であり、「付いた」とは異語。ある地位・職に着任するという意味で、能力の蓄積とは全く異なる。</li></ul><h4>よくある誤答</h4><p>Bの「決心がついた」は「ようやく」が共通するため紛らわしい。しかし、問題文の核心は<strong>「蓄積された結果としての定着」</strong>であり、Bは<strong>「迷いの末の確定」</strong>。「長年の修練→自信」は因果関係の蓄積型、「決心がつく」は判断の瞬間型という違いに注目。</p><div class="tip">「つく」の多義語パターン：①付着（傷/汚れがつく）、②蓄積・定着（力/自信がつく）、③確定（決心/けりがつく）、④就任（役職につく＝「就く」）、⑤点灯（明かりがつく）。SPIでは②③の区別が頻出。<strong>「長い時間をかけて」なら②、「ある時点で決まる」なら③</strong>。</div>`},
+  {id:21,category:"表の虫食い",subcategory:"売上表",question:`3店舗の四半期別売上表。甲店Q2と乙店Q3の合計は？<div class="table-scroll"><table class="quiz-table"><tr><th></th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>合計</th></tr><tr><td>甲店</td><td>120</td><td><span class="blank">？</span></td><td>150</td><td>130</td><td>540</td></tr><tr><td>乙店</td><td>100</td><td>130</td><td><span class="blank">？</span></td><td>140</td><td>510</td></tr><tr><td>丙店</td><td>90</td><td>110</td><td>120</td><td>100</td><td>420</td></tr><tr><td>合計</td><td>310</td><td>380</td><td>410</td><td>370</td><td>1470</td></tr></table></div>`,choices:[{label:"A",text:"260万円"},{label:"B",text:"270万円"},{label:"C",text:"280万円"},{label:"D",text:"290万円"}],answer:"C",explanation:`<p><strong>正答: C（280万円）</strong></p><h4>解法ステップ</h4><ol><li><strong>甲店Q2の算出（行方向）：</strong><br>甲店の合計=540。既知の値: Q1=120, Q3=150, Q4=130<br>甲店Q2 = 540 − 120 − 150 − 130 = <strong>140</strong></li><li><strong>乙店Q3の算出（行方向）：</strong><br>乙店の合計=510。既知の値: Q1=100, Q2=130, Q4=140<br>乙店Q3 = 510 − 100 − 130 − 140 = <strong>140</strong></li><li><strong>合計の計算：</strong><br>甲店Q2 + 乙店Q3 = 140 + 140 = <strong>280万円</strong></li></ol><h4>検算（列方向でのクロスチェック）</h4><ul><li>Q2列の合計: 甲140 + 乙130 + 丙110 = 380 → 表の合計380と一致 ✓</li><li>Q3列の合計: 甲150 + 乙140 + 丙120 = 410 → 表の合計410と一致 ✓</li></ul><h4>各選択肢の分析</h4><ul><li>A「260万円」→ ✗ 甲Q2かQ3のいずれかを10少なく計算した場合に出る値。</li><li>B「270万円」→ ✗ 引き算で1つの値を間違えた場合の誤答。</li><li><strong>C「280万円」→ ✓ 正解。</strong></li><li>D「290万円」→ ✗ 甲Q2かQ3のいずれかを10多く計算した場合に出る値。</li></ul><h4>よくある誤答</h4><p>列の合計（縦方向）から求める方法と行の合計（横方向）から求める方法の2つがあるが、<strong>行の合計から求める方が直接的</strong>。列から求めると、2つの空欄が同じ列に含まれていないか確認が必要。間違いやすいのは、合計欄の数値を読み違えるケース。</p><div class="tip">表の虫食いの鉄則：①空欄が1つしかない行or列を最初に探す → ②その行or列の合計から空欄を逆算 → ③求めた値を別の行or列で検算。<strong>必ずクロスチェック（行⇔列）で確認</strong>すれば計算ミスを防げる。</div>`},
+  {id:22,category:"表の虫食い",subcategory:"社員構成表",question:`4部署の社員構成表。開発部の女性正社員は？<div class="table-scroll"><table class="quiz-table"><tr><th></th><th>男性正社員</th><th>女性正社員</th><th>男性契約</th><th>女性契約</th><th>合計</th></tr><tr><td>営業部</td><td>24</td><td>12</td><td>6</td><td><span class="blank">？</span></td><td>48</td></tr><tr><td>開発部</td><td>30</td><td><span class="blank">？</span></td><td>4</td><td>2</td><td>52</td></tr><tr><td>総務部</td><td>10</td><td>8</td><td>3</td><td>5</td><td>26</td></tr><tr><td>人事部</td><td>8</td><td>10</td><td>2</td><td>4</td><td>24</td></tr><tr><td>合計</td><td>72</td><td>46</td><td>15</td><td>17</td><td>150</td></tr></table></div>`,choices:[{label:"A",text:"14人"},{label:"B",text:"16人"},{label:"C",text:"18人"},{label:"D",text:"20人"}],answer:"B",explanation:`<p><strong>正答: B（16人）</strong></p><h4>解法ステップ</h4><ol><li><strong>問われている空欄の特定：</strong>開発部の女性正社員。開発部の行には空欄が1つだけなので、行の合計から直接求められる。</li><li><strong>行方向の計算：</strong><br>開発部合計 = 52<br>開発部の女性正社員 = 52 − 男性正社員(30) − 男性契約(4) − 女性契約(2)<br>= 52 − 36 = <strong>16人</strong></li></ol><h4>検算（列方向でのクロスチェック）</h4><ul><li>女性正社員の列合計 = 46<br>営業部(12) + 開発部(?) + 総務部(8) + 人事部(10) = 46<br>→ ? = 46 − 12 − 8 − 10 = <strong>16人 ✓</strong></li></ul><h4>補足：営業部の女性契約社員</h4><p>表にはもう1つの空欄（営業部の女性契約）がある。この問題では直接問われていないが、参考に算出すると:<br>営業部: 48 − 24 − 12 − 6 = <strong>6人</strong><br>列で検算: 女性契約合計17 − 開発部2 − 総務部5 − 人事部4 = <strong>6人 ✓</strong></p><h4>各選択肢の分析</h4><ul><li>A「14人」→ ✗ 男性契約(4)を加算し忘れた場合: 52-30-2=20とするなどの計算ミス由来。</li><li><strong>B「16人」→ ✓ 正解。</strong></li><li>C「18人」→ ✗ 女性契約(2)を引き忘れた場合: 52-30-4=18。</li><li>D「20人」→ ✗ 男性契約と女性契約の両方を引き忘れた場合: 52-30-2=20。</li></ul><h4>よくある誤答</h4><p>最も多いのはC(18人)で、女性契約(2)を計算に含め忘れるパターン。表が4カテゴリあるのに3カテゴリしか引かないミス。<strong>引く項目の数を合計列数−1と照合</strong>してから計算するのが安全。</p><div class="tip">表の虫食いで複数の空欄がある場合、まず<strong>空欄が1つしかない行or列</strong>を探して先に解く。その値が確定すれば、残りの空欄も芋づる式に解けることが多い。</div>`},
+  {id:23,category:"表の虫食い",subcategory:"商品利益表",question:`商品A〜Dの販売データ。利益=(定価-原価)×個数。4商品の利益合計は？<div class="table-scroll"><table class="quiz-table"><tr><th>商品</th><th>原価</th><th>定価</th><th>個数</th><th>利益</th></tr><tr><td>A</td><td>800</td><td>1,200</td><td>50</td><td><span class="blank">？</span></td></tr><tr><td>B</td><td>600</td><td><span class="blank">？</span></td><td>80</td><td>32,000</td></tr><tr><td>C</td><td><span class="blank">？</span></td><td>1,500</td><td>40</td><td>28,000</td></tr><tr><td>D</td><td>900</td><td>1,400</td><td><span class="blank">？</span></td><td>25,000</td></tr></table></div>`,choices:[{label:"A",text:"100,000円"},{label:"B",text:"103,000円"},{label:"C",text:"105,000円"},{label:"D",text:"108,000円"}],answer:"C",explanation:`<p><strong>正答: C（105,000円）</strong></p><h4>解法ステップ</h4><ol><li><strong>設問の分析：</strong>4商品の<strong>利益合計</strong>が問われている。利益列を見ると、Aだけが空欄でB〜Dは利益が既知。つまり<strong>Aの利益だけ計算すればよい</strong>。B〜Dの空欄（定価・原価・個数）は計算不要。</li><li><strong>商品Aの利益計算：</strong><br>利益 = (定価 − 原価) × 個数<br>= (1,200 − 800) × 50<br>= 400 × 50 = <strong>20,000円</strong></li><li><strong>合計の計算：</strong><br>A(20,000) + B(32,000) + C(28,000) + D(25,000)<br>= <strong>105,000円</strong></li></ol><h4>検算</h4><p>概算チェック: 20,000 + 32,000 = 52,000。28,000 + 25,000 = 53,000。52,000 + 53,000 = 105,000 ✓</p><h4>参考：B〜Dの空欄（問われていないが確認用）</h4><ul><li>商品B定価: 32,000 ÷ 80 + 600 = 400 + 600 = 1,000円</li><li>商品C原価: 1,500 − (28,000 ÷ 40) = 1,500 − 700 = 800円</li><li>商品D個数: 25,000 ÷ (1,400 − 900) = 25,000 ÷ 500 = 50個</li></ul><h4>各選択肢の分析</h4><ul><li>A「100,000円」→ ✗ Aの利益を15,000（差額300×50）と誤計算した場合の値。</li><li>B「103,000円」→ ✗ 中間的な計算ミスで生じる値。</li><li><strong>C「105,000円」→ ✓ 正解。</strong></li><li>D「108,000円」→ ✗ Aの利益を23,000と誤計算した場合の値。</li></ul><h4>よくある誤答</h4><p>最大のミスは、B〜Dの空欄（定価・原価・個数）も全て計算しようとして時間を浪費すること。<strong>設問で問われているのは利益合計</strong>なので、利益列に空欄があるAだけ計算すれば十分。設問を正確に読み、<strong>必要な計算だけに集中する</strong>ことが時短の鍵。</p><div class="tip">表の虫食い（公式型）のコツ：①設問で求められている値を特定 → ②その値を出すのに必要な空欄だけを計算 → ③不要な空欄は無視。<strong>「全ての空欄を埋める必要はない」</strong>という発想が時短に直結する。</div>`},
+  {id:24,category:"表の虫食い",subcategory:"来客売上データ",question:`売上(百万円)=来客数(千人)×客単価(円)÷1,000。3年間の売上合計は？<div class="table-scroll"><table class="quiz-table"><tr><th></th><th>来客数(千人)</th><th>客単価(円)</th><th>売上(百万円)</th></tr><tr><td>2023</td><td>80</td><td>2,500</td><td><span class="blank">？</span></td></tr><tr><td>2024</td><td><span class="blank">？</span></td><td>2,400</td><td>216</td></tr><tr><td>2025</td><td>100</td><td><span class="blank">？</span></td><td>260</td></tr></table></div>`,choices:[{label:"A",text:"656百万円"},{label:"B",text:"666百万円"},{label:"C",text:"676百万円"},{label:"D",text:"686百万円"}],answer:"C",explanation:`<p><strong>正答: C（676百万円）</strong></p><h4>解法ステップ</h4><ol><li><strong>設問の分析：</strong>3年間の<strong>売上合計</strong>が問われている。売上列を見ると、2023年だけが空欄で2024年(216)と2025年(260)は既知。よって<strong>2023年の売上だけ計算すればよい</strong>。</li><li><strong>公式の確認：</strong><br>売上(百万円) = 来客数(千人) × 客単価(円) ÷ 1,000</li><li><strong>2023年の売上計算：</strong><br>来客数=80千人、客単価=2,500円<br>売上 = 80 × 2,500 ÷ 1,000 = 200,000 ÷ 1,000 = <strong>200百万円</strong></li><li><strong>合計の計算：</strong><br>2023(200) + 2024(216) + 2025(260) = <strong>676百万円</strong></li></ol><h4>検算（他の空欄で公式の整合性を確認）</h4><ul><li>2024年の来客数: 売上216 × 1,000 ÷ 客単価2,400 = 216,000 ÷ 2,400 = <strong>90千人</strong></li><li>2025年の客単価: 売上260 × 1,000 ÷ 来客数100 = 260,000 ÷ 100 = <strong>2,600円</strong></li><li>公式が全年度で整合 → 計算方法に誤りなし ✓</li></ul><h4>各選択肢の分析</h4><ul><li>A「656百万円」→ ✗ 2023年の売上を180と計算した場合（来客数を60と読み間違えなど）。</li><li>B「666百万円」→ ✗ 2023年の売上を190と計算した場合。</li><li><strong>C「676百万円」→ ✓ 正解。</strong></li><li>D「686百万円」→ ✗ 2023年の売上を210と計算した場合（÷1,000の処理ミスなど）。</li></ul><h4>よくある誤答</h4><p>最大の落とし穴は<strong>単位換算</strong>。来客数が「千人」、客単価が「円」、売上が「百万円」と3つの異なる単位が混在している。公式「÷1,000」を忘れると200,000百万円という桁違いの値になる。計算前に<strong>単位の整合性</strong>を確認することが重要。</p><div class="tip">単位換算を含む表の問題のコツ：計算前に公式を「単位だけで」検算する。来客数(千人) × 客単価(円) = 千円 → 百万円にするには÷1,000。このように<strong>単位の次元分析</strong>を先にやると、桁間違いを防げる。</div>`}
+]; }
+
+// ===== SET3 DATA =====
+const SET3 = REPLACE_SET3_INLINE();
+function REPLACE_SET3_INLINE() { return [
+  {id:25,category:"文章の構造把握",subcategory:"因果 vs 対比",question:`5つの文を<strong>論理構造の類似性</strong>で2グループに分けよ。<div class="structure-items"><div class="item"><span class="item-label">ア</span>この地域は降水量が多いため、稲作が盛んに行われている。</div><div class="item"><span class="item-label">イ</span>この地域は降水量が多いが、稲作はあまり行われていない。</div><div class="item"><span class="item-label">ウ</span>この国は資源が豊富であるため、輸出産業が発達している。</div><div class="item"><span class="item-label">エ</span>この国は資源が豊富であるが、輸出産業はあまり発達していない。</div><div class="item"><span class="item-label">オ</span>この企業は研究開発費が大きいため、特許の取得件数が多い。</div></div>`,choices:[{label:"A",text:"ア・イ・ウ ／ エ・オ"},{label:"B",text:"ア・ウ・オ ／ イ・エ"},{label:"C",text:"ア・エ ／ イ・ウ・オ"},{label:"D",text:"ア・イ・エ ／ ウ・オ"}],answer:"B",explanation:`<p><strong>正答: B（ア・ウ・オ ／ イ・エ）</strong></p><h4>解法ステップ</h4><ol><li><strong>構造把握の基本原則：</strong>この問題では<strong>内容（トピック）ではなく、論理構造（接続関係）</strong>で分類する。5つの文の「話題」に惑わされず、<strong>前半と後半がどのような論理関係で結ばれているか</strong>に注目する。</li><li><strong>各文の接続語を抽出：</strong><br>ア「降水量が多い<strong>ため</strong>、稲作が盛ん」→ <strong>因果関係</strong>（原因→結果）<br>イ「降水量が多い<strong>が</strong>、稲作はあまり行われていない」→ <strong>逆接・対比</strong>（予想に反する結果）<br>ウ「資源が豊富である<strong>ため</strong>、輸出産業が発達」→ <strong>因果関係</strong><br>エ「資源が豊富である<strong>が</strong>、輸出産業はあまり発達していない」→ <strong>逆接・対比</strong><br>オ「研究開発費が大きい<strong>ため</strong>、特許の取得件数が多い」→ <strong>因果関係</strong></li><li><strong>グループ分け：</strong><br>因果グループ（「ため」）：<strong>ア・ウ・オ</strong><br>逆接・対比グループ（「が」）：<strong>イ・エ</strong></li></ol><h4>各選択肢の分析</h4><ul><li>A「ア・イ・ウ ／ エ・オ」→ ✗ 内容（地域・国）で分けたもの。論理構造ではない。</li><li><strong>B「ア・ウ・オ ／ イ・エ」→ ✓ 正解。</strong>因果と逆接で正しく分類。</li><li>C「ア・エ ／ イ・ウ・オ」→ ✗ 不規則な分類。論理的根拠がない。</li><li>D「ア・イ・エ ／ ウ・オ」→ ✗ 地域の問題（ア・イ）をまとめたように見えるが、論理構造では不一致。</li></ul><h4>よくある誤答</h4><p>最も多いのがAで、<strong>トピック（降水量・資源・研究開発）や地域（この地域・この国・この企業）で分けてしまう</strong>パターン。構造把握では「何について述べているか」ではなく「どのような論理で述べているか」が問われている。</p><div class="tip">文章の構造把握の鉄則：<strong>接続語（ため/が/しかし/たとえば/すれば等）が構造分類の最大の手がかり</strong>。内容やトピックは意図的に似せてあるので、惑わされないこと。まず全文の接続語だけを抜き出してグループ化するのが最速。</div>`},
+  {id:26,category:"文章の構造把握",subcategory:"条件 vs 譲歩",question:`5つの文を<strong>論理構造の類似性</strong>で2グループに分けよ。<div class="structure-items"><div class="item"><span class="item-label">ア</span>十分な準備をすれば、本番で実力を発揮することができる。</div><div class="item"><span class="item-label">イ</span>十分な準備をしても、本番で実力を発揮できないことがある。</div><div class="item"><span class="item-label">ウ</span>適切な肥料を与えれば、作物の収穫量は増加する。</div><div class="item"><span class="item-label">エ</span>適切な肥料を与えても、天候次第で収穫量は減少することがある。</div><div class="item"><span class="item-label">オ</span>コストを削減すれば、利益率を改善することが可能だ。</div></div>`,choices:[{label:"A",text:"ア・ウ・エ ／ イ・オ"},{label:"B",text:"ア・イ・オ ／ ウ・エ"},{label:"C",text:"ア・エ・オ ／ イ・ウ"},{label:"D",text:"ア・ウ・オ ／ イ・エ"}],answer:"D",explanation:`<p><strong>正答: D（ア・ウ・オ ／ イ・エ）</strong></p><h4>解法ステップ</h4><ol><li><strong>論理構造の見極め：</strong>各文が「条件→帰結」なのか「譲歩→逆の結果」なのかを判別する。キーとなるのは<strong>動詞の活用形</strong>。</li><li><strong>各文の構造分析：</strong><br>ア「準備を<strong>すれば</strong>、実力を発揮<strong>できる</strong>」→ <strong>条件文</strong>（仮定形「すれば」→ 肯定的帰結）<br>イ「準備を<strong>しても</strong>、実力を発揮<strong>できないことがある</strong>」→ <strong>譲歩文</strong>（「しても」→ 期待に反する結果）<br>ウ「肥料を<strong>与えれば</strong>、収穫量は<strong>増加する</strong>」→ <strong>条件文</strong>（仮定形「与えれば」→ 肯定的帰結）<br>エ「肥料を<strong>与えても</strong>、収穫量は<strong>減少することがある</strong>」→ <strong>譲歩文</strong>（「与えても」→ 期待に反する結果）<br>オ「コストを<strong>削減すれば</strong>、利益率を<strong>改善できる</strong>」→ <strong>条件文</strong>（仮定形「すれば」→ 肯定的帰結）</li><li><strong>グループ分け：</strong><br>条件グループ（「〜すれば/与えれば」→ 肯定的結果）：<strong>ア・ウ・オ</strong><br>譲歩グループ（「〜しても/与えても」→ 否定的結果）：<strong>イ・エ</strong></li></ol><h4>条件文と譲歩文の違い</h4><table><tr><th></th><th>条件文</th><th>譲歩文</th></tr><tr><td>活用形</td><td>「〜すれば」「〜すると」</td><td>「〜しても」「〜したところで」</td></tr><tr><td>論理</td><td>原因→期待通りの結果</td><td>原因→期待に反する結果</td></tr><tr><td>例</td><td>努力すれば成功する</td><td>努力しても成功しない</td></tr></table><h4>各選択肢の分析</h4><ul><li>A「ア・ウ・エ ／ イ・オ」→ ✗ エ（譲歩）が条件グループに混入。</li><li>B「ア・イ・オ ／ ウ・エ」→ ✗ イ（譲歩）とオ（条件）が混在。</li><li>C「ア・エ・オ ／ イ・ウ」→ ✗ 不規則な分類。</li><li><strong>D「ア・ウ・オ ／ イ・エ」→ ✓ 正解。</strong></li></ul><h4>よくある誤答</h4><p>トピック（準備/肥料/コスト）で分けてしまうのが典型的ミス。また、「すれば」と「しても」の微妙な活用の違いを見落として、「条件」として一括してしまうこともある。<strong>文末の結果が肯定的か否定的か</strong>を合わせてチェックすると、確実に判別できる。</p><div class="tip">条件 vs 譲歩の見分け方：①接続表現の形（「〜すれば」vs「〜しても」）、②結果の方向性（期待通り vs 期待に反する）。<strong>この2軸が一致していれば同グループ</strong>。SPIの構造把握では、同じトピックで条件文と譲歩文のペアが出題されることが多い。</div>`},
+  {id:27,category:"文章の構造把握",subcategory:"主張+根拠 vs 描写+感想",question:`5つの文を<strong>論理構造の類似性</strong>で2グループに分けよ。<div class="structure-items"><div class="item"><span class="item-label">ア</span>都市部の公園面積は年々減少している。このままでは住民の健康維持に支障をきたすだろう。</div><div class="item"><span class="item-label">イ</span>朝の渓谷には霧が立ち込めていた。まるで水墨画の世界に迷い込んだようだった。</div><div class="item"><span class="item-label">ウ</span>若年層の投票率は過去最低を記録した。民主主義の根幹が揺らぎかねない深刻な事態である。</div><div class="item"><span class="item-label">エ</span>夕暮れの港には漁船が並んでいた。潮の香りがどこか懐かしい気持ちにさせた。</div><div class="item"><span class="item-label">オ</span>地方の商店街ではシャッターを下ろした店舗が目立つ。地域経済の活性化策を早急に講じるべきだ。</div></div>`,choices:[{label:"A",text:"ア・イ・ウ ／ エ・オ"},{label:"B",text:"ア・ウ・オ ／ イ・エ"},{label:"C",text:"ア・エ ／ イ・ウ・オ"},{label:"D",text:"ア・イ・エ ／ ウ・オ"}],answer:"B",explanation:`<p><strong>正答: B（ア・ウ・オ ／ イ・エ）</strong></p><h4>解法ステップ</h4><ol><li><strong>各文を「前半＋後半」の2文構造として分析：</strong>5つの文はいずれも2つの文から成る。前半がどのような情報を提示し、後半がどのような展開をしているかに注目する。</li><li><strong>各文の構造分析：</strong><br><strong>ア</strong>「公園面積は減少している」→「住民の健康維持に支障を<strong>きたすだろう</strong>」<br>前半＝<strong>客観的事実</strong>／後半＝<strong>主張・警告</strong>（「〜だろう」）<br><br><strong>イ</strong>「渓谷には霧が立ち込めていた」→「水墨画の世界に迷い込んだ<strong>ようだった</strong>」<br>前半＝<strong>情景描写</strong>／後半＝<strong>個人的感想・印象</strong>（「〜ようだった」）<br><br><strong>ウ</strong>「若年層の投票率は過去最低」→「民主主義の根幹が揺らぎかねない<strong>深刻な事態である</strong>」<br>前半＝<strong>客観的事実</strong>／後半＝<strong>主張・評価</strong>（「深刻な事態」「揺らぎかねない」）<br><br><strong>エ</strong>「港には漁船が並んでいた」→「潮の香りがどこか<strong>懐かしい気持ちにさせた</strong>」<br>前半＝<strong>情景描写</strong>／後半＝<strong>個人的感想・感覚</strong>（「懐かしい気持ち」）<br><br><strong>オ</strong>「商店街ではシャッターを下ろした店舗が目立つ」→「地域経済の活性化策を早急に<strong>講じるべきだ</strong>」<br>前半＝<strong>客観的事実</strong>／後半＝<strong>主張・提言</strong>（「〜べきだ」）</li><li><strong>グループ分け：</strong><br>事実→主張・提言グループ：<strong>ア・ウ・オ</strong>（社会問題を指摘し、意見を述べる）<br>描写→感想・印象グループ：<strong>イ・エ</strong>（風景を描き、個人の感覚を述べる）</li></ol><h4>2つのグループの対比</h4><table><tr><th></th><th>事実→主張（ア・ウ・オ）</th><th>描写→感想（イ・エ）</th></tr><tr><td>前半の性質</td><td>社会的・統計的事実</td><td>自然・風景の描写</td></tr><tr><td>後半の性質</td><td>社会的意見・警告・提言</td><td>個人的印象・情緒</td></tr><tr><td>文末表現</td><td>「〜だろう」「〜べきだ」「深刻」</td><td>「〜ようだった」「懐かしい」</td></tr><tr><td>目的</td><td>読者の行動変容を促す</td><td>読者と情緒を共有する</td></tr></table><h4>各選択肢の分析</h4><ul><li>A「ア・イ・ウ ／ エ・オ」→ ✗ イ（描写→感想）がア・ウ（事実→主張）と混在。</li><li><strong>B「ア・ウ・オ ／ イ・エ」→ ✓ 正解。</strong></li><li>C「ア・エ ／ イ・ウ・オ」→ ✗ 不規則で論理的根拠がない。</li><li>D「ア・イ・エ ／ ウ・オ」→ ✗ アだけが分離。3:2の分割比が異なる。</li></ul><h4>よくある誤答</h4><p>Aを選ぶ誤答が多い。ア・イがともに「ある場所の状態」を述べているように見えるため、<strong>前半のトピック類似性</strong>で分類してしまう。構造把握では<strong>後半（結論部分）の論理的性格</strong>が分類の決め手。</p><div class="tip">「事実→主張」と「描写→感想」の見分け方：後半に<strong>「〜べきだ」「〜だろう」「深刻」「課題」</strong>などの価値判断語があれば主張型。<strong>「〜ようだった」「懐かしい」「美しい」</strong>などの感覚語があれば感想型。前半ではなく<strong>後半の語尾・表現</strong>に注目。</div>`},
+  {id:28,category:"文章の構造把握",subcategory:"列挙 vs 例示",question:`5つの文を<strong>論理構造の類似性</strong>で2グループに分けよ。<div class="structure-items"><div class="item"><span class="item-label">ア</span>再生可能エネルギーには太陽光、風力、地熱などがあり、いずれも開発が進められている。</div><div class="item"><span class="item-label">イ</span>健康維持には運動が重要である。たとえばウォーキングは手軽に始められる有酸素運動だ。</div><div class="item"><span class="item-label">ウ</span>日本の伝統芸能には歌舞伎、能、狂言などがあり、それぞれ独自の様式を持っている。</div><div class="item"><span class="item-label">エ</span>情報セキュリティの脅威は増加している。たとえばランサムウェアによる被害は倍増した。</div><div class="item"><span class="item-label">オ</span>人口減少への対策として移民政策がしばしば議論される。たとえばドイツでは積極的な受け入れが行われてきた。</div></div>`,choices:[{label:"A",text:"ア・イ・ウ ／ エ・オ"},{label:"B",text:"ア・ウ ／ イ・エ・オ"},{label:"C",text:"ア・オ ／ イ・ウ・エ"},{label:"D",text:"ア・イ・エ ／ ウ・オ"}],answer:"B",explanation:`<p><strong>正答: B（ア・ウ ／ イ・エ・オ）</strong></p><h4>解法ステップ</h4><ol><li><strong>構造の観点を特定：</strong>各文が具体的な項目をどのように提示しているかに注目。「複数の項目を対等に並べる」パターンと「一般論を述べてから具体例を1つ挙げる」パターンの2種類がある。</li><li><strong>各文の構造分析：</strong><br><strong>ア</strong>「再生可能エネルギーには<strong>太陽光、風力、地熱など</strong>があり、<strong>いずれも</strong>開発が進められている」<br>→ <strong>列挙型</strong>：3つ以上の具体例を対等に並列し、「いずれも」で一括して述べる。<br><br><strong>イ</strong>「健康維持には運動が重要である。<strong>たとえば</strong>ウォーキングは手軽に始められる有酸素運動だ」<br>→ <strong>例示型</strong>：一般論（運動が重要）を述べた後、「たとえば」で具体例を1つ挙げる。<br><br><strong>ウ</strong>「日本の伝統芸能には<strong>歌舞伎、能、狂言など</strong>があり、<strong>それぞれ</strong>独自の様式を持っている」<br>→ <strong>列挙型</strong>：3つの具体例を対等に並列し、「それぞれ」で一括して述べる。<br><br><strong>エ</strong>「情報セキュリティの脅威は増加している。<strong>たとえば</strong>ランサムウェアによる被害は倍増した」<br>→ <strong>例示型</strong>：一般論（脅威が増加）を述べた後、具体例を1つ挙げる。<br><br><strong>オ</strong>「人口減少への対策として移民政策がしばしば議論される。<strong>たとえば</strong>ドイツでは積極的な受け入れが行われてきた」<br>→ <strong>例示型</strong>：一般論を述べた後、具体例（ドイツ）を1つ挙げる。</li><li><strong>グループ分け：</strong><br>列挙型：<strong>ア・ウ</strong>（「〜など」＋3つ以上の対等並列）<br>例示型：<strong>イ・エ・オ</strong>（「たとえば」＋具体例1つ）</li></ol><h4>2つのグループの対比</h4><table><tr><th></th><th>列挙型（ア・ウ）</th><th>例示型（イ・エ・オ）</th></tr><tr><td>キーワード</td><td>「〜など」「いずれも」「それぞれ」</td><td>「たとえば」「例えば」</td></tr><tr><td>具体例の数</td><td>3つ以上（対等に並列）</td><td>1つ（代表例として提示）</td></tr><tr><td>具体例の扱い</td><td>全体像を網羅的に示す</td><td>一般論を裏付ける根拠</td></tr><tr><td>文の構成</td><td>1文で完結</td><td>一般論（1文目）→具体例（2文目）</td></tr></table><h4>各選択肢の分析</h4><ul><li>A「ア・イ・ウ ／ エ・オ」→ ✗ イ（例示型）がア・ウ（列挙型）に混入。</li><li><strong>B「ア・ウ ／ イ・エ・オ」→ ✓ 正解。</strong></li><li>C「ア・オ ／ イ・ウ・エ」→ ✗ オ（例示型）がア（列挙型）と同グループに。</li><li>D「ア・イ・エ ／ ウ・オ」→ ✗ 不規則な分類。</li></ul><h4>よくある誤答</h4><p>Aを選ぶ誤答が多い。ア・イ・ウが「具体的な名前（太陽光/ウォーキング/歌舞伎）を含む」点で似て見えるが、<strong>列挙は「並列」で例示は「代表」</strong>という構造の違いを見落としている。</p><div class="tip">列挙 vs 例示の見分け方：<strong>「〜など」＝列挙</strong>（3つ以上を対等に並べる）、<strong>「たとえば」＝例示</strong>（一般論の後に1つの具体例）。この2つのキーワードだけで即答できる。グループの人数が2:3や3:2になることが多い。</div>`},
+  {id:29,category:"数理の構造把握",subcategory:"倍率型 vs 差型",question:`5つの問題を<strong>計算構造の類似性</strong>で2グループに分けよ。<div class="structure-items"><div class="item"><span class="item-label">ア</span>定価500円の商品を400円で買った。定価の何割で買えたか。</div><div class="item"><span class="item-label">イ</span>兄175cm、弟140cm。身長の差は何cmか。</div><div class="item"><span class="item-label">ウ</span>A市80万人、B市20万人。A市はB市の何倍か。</div><div class="item"><span class="item-label">エ</span>今年1200万円、昨年1500万円。売上はいくら減少したか。</div><div class="item"><span class="item-label">オ</span>合格者数は受験者数の60%。合格者数は受験者数の何割か。</div></div>`,choices:[{label:"A",text:"ア・ウ・オ ／ イ・エ"},{label:"B",text:"ア・イ・ウ ／ エ・オ"},{label:"C",text:"ア・エ ／ イ・ウ・オ"},{label:"D",text:"ア・イ・エ ／ ウ・オ"}],answer:"A",explanation:`<p><strong>正答: A（ア・ウ・オ ／ イ・エ）</strong></p><h4>解法ステップ</h4><ol><li><strong>問われている「計算構造」とは：</strong>各問題の答えを求めるときに使う<strong>基本演算（四則演算のどれか）</strong>に注目する。具体的な数値や分野は無視し、<strong>演算の種類</strong>で分類する。</li><li><strong>各問題の計算構造を分析：</strong><br><strong>ア</strong>「定価500円の商品を400円で買った。定価の何割で買えたか」<br>→ 400 <strong>÷</strong> 500 = 0.8 = 8割。<strong>割り算（除法）</strong>で比率を求める。<br><br><strong>イ</strong>「兄175cm、弟140cm。身長の差は何cmか」<br>→ 175 <strong>−</strong> 140 = 35cm。<strong>引き算（減法）</strong>で差を求める。<br><br><strong>ウ</strong>「A市80万人、B市20万人。A市はB市の何倍か」<br>→ 80 <strong>÷</strong> 20 = 4倍。<strong>割り算（除法）</strong>で比率を求める。<br><br><strong>エ</strong>「今年1200万円、昨年1500万円。売上はいくら減少したか」<br>→ 1500 <strong>−</strong> 1200 = 300万円。<strong>引き算（減法）</strong>で差を求める。<br><br><strong>オ</strong>「合格者数は受験者数の60%。合格者数は受験者数の何割か」<br>→ 60% = 6割。これは割合→割への<strong>比率変換（除法的思考）</strong>。実質的に「割合を求める」操作。</li><li><strong>グループ分け：</strong><br>倍率型（÷ 除法）：<strong>ア・ウ・オ</strong>（「何割」「何倍」→ 比率を求める）<br>差型（− 減法）：<strong>イ・エ</strong>（「差」「いくら減少」→ 差を求める）</li></ol><h4>2つのグループの対比</h4><table><tr><th></th><th>倍率型（ア・ウ・オ）</th><th>差型（イ・エ）</th></tr><tr><td>基本演算</td><td>割り算（÷）</td><td>引き算（−）</td></tr><tr><td>答えの性質</td><td>比率（○倍、○割、○%）</td><td>絶対量（○cm、○万円）</td></tr><tr><td>キーワード</td><td>「何倍」「何割」「何%」</td><td>「差は」「いくら増減」</td></tr><tr><td>単位</td><td>無次元（倍、割）</td><td>元の単位と同じ</td></tr></table><h4>各選択肢の分析</h4><ul><li><strong>A「ア・ウ・オ ／ イ・エ」→ ✓ 正解。</strong>倍率型と差型で正しく分類。</li><li>B「ア・イ・ウ ／ エ・オ」→ ✗ イ（差型）がア・ウ（倍率型）に混入。</li><li>C「ア・エ ／ イ・ウ・オ」→ ✗ 不規則な分類。</li><li>D「ア・イ・エ ／ ウ・オ」→ ✗ アが差型グループに混入。</li></ul><h4>よくある誤答</h4><p>オの「60%は何割か」を<strong>単なる変換であって計算ではない</strong>と判断し、どちらのグループにも入れられないと迷うケース。しかし「%→割」の変換は本質的に<strong>比率（倍率）を扱う操作</strong>であり、倍率型に分類される。</p><div class="tip">数理の構造把握のコツ：<strong>答えの単位に注目</strong>する。答えが「倍」「割」「%」なら倍率型（÷）、答えが「cm」「円」など元の単位と同じなら差型（−）。この判定法なら文章を読み込まなくても<strong>設問文の最後の1語</strong>で即判別できる。</div>`},
+  {id:30,category:"数理の構造把握",subcategory:"加法型 vs 減法型",question:`5つの問題を<strong>計算構造の類似性</strong>で2グループに分けよ。<div class="structure-items"><div class="item"><span class="item-label">ア</span>りんご3個とみかん5個を買った。果物は合わせて何個か。</div><div class="item"><span class="item-label">イ</span>100ページの本を68ページまで読んだ。残りは何ページか。</div><div class="item"><span class="item-label">ウ</span>午前35個、午後45個の製品を作った。1日の生産数は合計何個か。</div><div class="item"><span class="item-label">エ</span>予算50万円のうち32万円を使った。残りはいくらか。</div><div class="item"><span class="item-label">オ</span>参加者120人のうち女性78人。男性は何人か。</div></div>`,choices:[{label:"A",text:"ア・ウ ／ イ・エ・オ"},{label:"B",text:"ア・イ・ウ ／ エ・オ"},{label:"C",text:"ア・ウ・オ ／ イ・エ"},{label:"D",text:"ア・エ ／ イ・ウ・オ"}],answer:"A",explanation:`<p><strong>正答: A（ア・ウ ／ イ・エ・オ）</strong></p><h4>解法ステップ</h4><ol><li><strong>分類の視点：</strong>各問題が<strong>足し算（加法）</strong>で解けるか<strong>引き算（減法）</strong>で解けるかで分ける。</li><li><strong>各問題の計算構造を分析：</strong><br><strong>ア</strong>「りんご3個とみかん5個を買った。果物は<strong>合わせて</strong>何個か」<br>→ 3 <strong>+</strong> 5 = 8。2つの量を<strong>合算</strong>する。<br><br><strong>イ</strong>「100ページの本を68ページまで読んだ。<strong>残り</strong>は何ページか」<br>→ 100 <strong>−</strong> 68 = 32。全体から既読分を<strong>差し引く</strong>。<br><br><strong>ウ</strong>「午前35個、午後45個の製品を作った。1日の生産数は<strong>合計</strong>何個か」<br>→ 35 <strong>+</strong> 45 = 80。2つの量を<strong>合算</strong>する。<br><br><strong>エ</strong>「予算50万円のうち32万円を使った。<strong>残り</strong>はいくらか」<br>→ 50 <strong>−</strong> 32 = 18。全体から使用分を<strong>差し引く</strong>。<br><br><strong>オ</strong>「参加者120人のうち女性78人。<strong>男性</strong>は何人か」<br>→ 120 <strong>−</strong> 78 = 42。全体からある部分を<strong>差し引いて</strong>残りを求める。</li><li><strong>グループ分け：</strong><br>加法型（+）：<strong>ア・ウ</strong>（「合わせて」「合計」→ 部分＋部分＝全体）<br>減法型（−）：<strong>イ・エ・オ</strong>（「残り」「それ以外」→ 全体−部分＝残り）</li></ol><h4>2つのグループの対比</h4><table><tr><th></th><th>加法型（ア・ウ）</th><th>減法型（イ・エ・オ）</th></tr><tr><td>基本演算</td><td>足し算（+）</td><td>引き算（−）</td></tr><tr><td>構造</td><td>部分＋部分＝全体</td><td>全体−部分＝残り</td></tr><tr><td>キーワード</td><td>「合わせて」「合計」「計」</td><td>「残り」「のうち」「以外」</td></tr><tr><td>既知の情報</td><td>各部分が既知、全体を求める</td><td>全体と一部が既知、残りを求める</td></tr></table><h4>各選択肢の分析</h4><ul><li><strong>A「ア・ウ ／ イ・エ・オ」→ ✓ 正解。</strong></li><li>B「ア・イ・ウ ／ エ・オ」→ ✗ イ（減法型）がア・ウ（加法型）に混入。</li><li>C「ア・ウ・オ ／ イ・エ」→ ✗ オ（減法型）がア・ウ（加法型）に混入。</li><li>D「ア・エ ／ イ・ウ・オ」→ ✗ エ（減法型）とア（加法型）が同グループ。</li></ul><h4>よくある誤答</h4><p>Cを選ぶ誤答が多い。オの「参加者120人のうち女性78人。男性は何人か」は一見すると「78人+男性=120人」と加法的に見えるが、<strong>実際の計算は120−78=42（引き算）</strong>。求める操作が加法か減法かで判断すること。</p><div class="tip">加法 vs 減法の判定：<strong>設問のキーワード</strong>で即判別。「合わせて」「合計」「計」「足すと」→ 加法。「残り」「差」「のうち○○以外」「いくら減った」→ 減法。実際に立式しなくてもキーワードで分かる。</div>`},
+  {id:31,category:"数理の構造把握",subcategory:"除法型 vs 乗法型",question:`5つの問題を<strong>計算構造の類似性</strong>で2グループに分けよ。<div class="structure-items"><div class="item"><span class="item-label">ア</span>240kmを4時間で走った。平均時速は何kmか。</div><div class="item"><span class="item-label">イ</span>1個80円のりんごを12個買った。代金はいくらか。</div><div class="item"><span class="item-label">ウ</span>面積54m²、横9m。縦は何mか。</div><div class="item"><span class="item-label">エ</span>時速60kmで3時間走った。走行距離は何kmか。</div><div class="item"><span class="item-label">オ</span>900gを6人で等分。1人何gか。</div></div>`,choices:[{label:"A",text:"ア・イ・ウ ／ エ・オ"},{label:"B",text:"ア・ウ・オ ／ イ・エ"},{label:"C",text:"ア・エ ／ イ・ウ・オ"},{label:"D",text:"ア・イ・エ ／ ウ・オ"}],answer:"B",explanation:`<p><strong>正答: B（ア・ウ・オ ／ イ・エ）</strong></p><h4>解法ステップ</h4><ol><li><strong>分類の視点：</strong>各問題が<strong>割り算（除法）</strong>で解けるか<strong>掛け算（乗法）</strong>で解けるかで分ける。</li><li><strong>各問題の計算構造を分析：</strong><br><strong>ア</strong>「240kmを4時間で走った。<strong>平均時速</strong>は何kmか」<br>→ 240 <strong>÷</strong> 4 = 60km/h。全体量を分割数で割って<strong>単位あたりの量</strong>を求める。<br><br><strong>イ</strong>「1個80円のりんごを12個買った。<strong>代金</strong>はいくらか」<br>→ 80 <strong>×</strong> 12 = 960円。単価×個数で<strong>全体量</strong>を求める。<br><br><strong>ウ</strong>「面積54m²、横9m。<strong>縦</strong>は何mか」<br>→ 54 <strong>÷</strong> 9 = 6m。全体量（面積）を一方の辺で割って、もう一方の辺（<strong>単位あたりの量</strong>）を求める。<br><br><strong>エ</strong>「時速60kmで3時間走った。<strong>走行距離</strong>は何kmか」<br>→ 60 <strong>×</strong> 3 = 180km。速度×時間で<strong>全体量</strong>を求める。<br><br><strong>オ</strong>「900gを6人で等分。<strong>1人</strong>何gか」<br>→ 900 <strong>÷</strong> 6 = 150g。全体量を人数で割って<strong>1人あたりの量</strong>を求める。</li><li><strong>グループ分け：</strong><br>除法型（÷）：<strong>ア・ウ・オ</strong>（全体量÷分割数＝単位量）<br>乗法型（×）：<strong>イ・エ</strong>（単位量×回数＝全体量）</li></ol><h4>2つのグループの対比</h4><table><tr><th></th><th>除法型（ア・ウ・オ）</th><th>乗法型（イ・エ）</th></tr><tr><td>基本演算</td><td>割り算（÷）</td><td>掛け算（×）</td></tr><tr><td>構造</td><td>全体量 ÷ 分割数 = 単位量</td><td>単位量 × 回数 = 全体量</td></tr><tr><td>求めるもの</td><td>「1あたり」の量</td><td>「合計・総量」</td></tr><tr><td>キーワード</td><td>「平均」「1人あたり」「等分」</td><td>「代金」「走行距離」「全部で」</td></tr></table><h4>各選択肢の分析</h4><ul><li>A「ア・イ・ウ ／ エ・オ」→ ✗ イ（乗法型）がア・ウ（除法型）に混入。</li><li><strong>B「ア・ウ・オ ／ イ・エ」→ ✓ 正解。</strong></li><li>C「ア・エ ／ イ・ウ・オ」→ ✗ エ（乗法型）がア（除法型）と同グループ。</li><li>D「ア・イ・エ ／ ウ・オ」→ ✗ 不規則な分類。</li></ul><h4>よくある誤答</h4><p>アとエが紛らわしいと感じるケースが多い。どちらも「速度×時間＝距離」の公式に関わるが、<strong>アは距離÷時間＝速度（除法）</strong>、<strong>エは速度×時間＝距離（乗法）</strong>で逆の操作。<strong>「求めるものが全体量か単位量か」</strong>で判別するのがポイント。</p><div class="tip">除法 vs 乗法の判定：<strong>「1あたり」「平均」「等分」</strong>が出てきたら除法。<strong>「合計」「全部で」「代金」「走行距離」</strong>が出てきたら乗法。同じ公式（距離＝速度×時間）でも求めるものによって演算が変わることに注意。</div>`},
+  {id:32,category:"数理の構造把握",subcategory:"余事象型 vs 直接計算型",question:`5つの問題を<strong>解法構造の類似性</strong>で2グループに分けよ。<div class="structure-items"><div class="item"><span class="item-label">ア</span>サイコロ2回で少なくとも1回6が出る確率。</div><div class="item"><span class="item-label">イ</span>赤玉3個白玉2個から1個取り出し赤の確率。</div><div class="item"><span class="item-label">ウ</span>5人から委員長・副委員長を選ぶとき、AもBも選ばれない確率。</div><div class="item"><span class="item-label">エ</span>10本中当たり3本のくじで当たる確率。</div><div class="item"><span class="item-label">オ</span>コイン3枚で少なくとも1枚表の確率。</div></div>`,choices:[{label:"A",text:"ア・ウ・オ ／ イ・エ"},{label:"B",text:"ア・イ・ウ ／ エ・オ"},{label:"C",text:"ア・オ ／ イ・ウ・エ"},{label:"D",text:"ア・イ・エ ／ ウ・オ"}],answer:"C",explanation:`<p><strong>正答: C（ア・オ ／ イ・ウ・エ）</strong></p><h4>解法ステップ</h4><ol><li><strong>分類の視点：</strong>この問題は「計算構造」ではなく<strong>「解法構造」</strong>で分類する。つまり、確率を求める際に<strong>どのようなアプローチで解くか</strong>に注目する。</li><li><strong>各問題の解法構造を分析：</strong><br><strong>ア</strong>「サイコロ2回で<strong>少なくとも1回</strong>6が出る確率」<br>→ 「少なくとも1回」を直接数えるのは大変（1回だけ・2回とも、の場合分けが必要）。<br>→ <strong>余事象</strong>を使う：P = 1 − P(2回とも6以外) = 1 − (5/6)² = 1 − 25/36 = 11/36<br><br><strong>イ</strong>「赤玉3個白玉2個から1個取り出し<strong>赤</strong>の確率」<br>→ P = 3/5。<strong>直接計算</strong>で求められる。場合分け不要。<br><br><strong>ウ</strong>「5人から委員長・副委員長を選ぶとき、<strong>AもBも選ばれない</strong>確率」<br>→ P = ₃P₂ / ₅P₂ = 6/20 = 3/10。A,B以外の3人から2人選ぶ場合を<strong>直接計算</strong>。<br>（「AもBも選ばれない」は一見余事象に見えるが、条件が明確で直接計算可能）<br><br><strong>エ</strong>「10本中当たり3本のくじで<strong>当たる</strong>確率」<br>→ P = 3/10。<strong>直接計算</strong>で求められる。<br><br><strong>オ</strong>「コイン3枚で<strong>少なくとも1枚表</strong>の確率」<br>→ 「少なくとも1枚」を直接数えると7通り（1枚・2枚・3枚）の場合分けが必要。<br>→ <strong>余事象</strong>を使う：P = 1 − P(3枚とも裏) = 1 − (1/2)³ = 1 − 1/8 = 7/8</li><li><strong>グループ分け：</strong><br>余事象型：<strong>ア・オ</strong>（「少なくとも」→ 1−P(余事象)で計算）<br>直接計算型：<strong>イ・ウ・エ</strong>（条件を直接数えて計算）</li></ol><h4>2つのグループの対比</h4><table><tr><th></th><th>余事象型（ア・オ）</th><th>直接計算型（イ・ウ・エ）</th></tr><tr><td>解法</td><td>1 − P(余事象)</td><td>P = 条件に合う場合 / 全体</td></tr><tr><td>使う場面</td><td>条件が「少なくとも」「以上」</td><td>条件が単純・直接的</td></tr><tr><td>メリット</td><td>場合分けが劇的に減る</td><td>計算が直感的で分かりやすい</td></tr><tr><td>典型キーワード</td><td>「少なくとも」「1つ以上」</td><td>「当たる」「赤が出る」「選ばれない」</td></tr></table><h4>各選択肢の分析</h4><ul><li>A「ア・ウ・オ ／ イ・エ」→ ✗ ウは「選ばれない」だが、直接計算で解ける（余事象は不要）。</li><li>B「ア・イ・ウ ／ エ・オ」→ ✗ 不規則な分類。</li><li><strong>C「ア・オ ／ イ・ウ・エ」→ ✓ 正解。</strong></li><li>D「ア・イ・エ ／ ウ・オ」→ ✗ 不規則な分類。</li></ul><h4>よくある誤答</h4><p>Aを選ぶ誤答が最多。ウの「AもBも<strong>選ばれない</strong>」が否定表現なので余事象と勘違いしやすい。しかし、ウは「A,B以外の3人から2人選ぶ」と直接計算できる。余事象型の判別ポイントは否定表現ではなく<strong>「少なくとも」の有無</strong>。</p><div class="tip">余事象型の見分け方：<strong>「少なくとも○つ」「○つ以上」</strong>が出てきたら余事象型。これは場合分けが爆発する（1つ/2つ/3つ…）ため、「1−（1つも○○でない確率）」で計算する方が圧倒的に速い。逆に「○○でない確率」は否定表現でも直接計算できることが多い。</div>`}
+]; }
+
+// ===== SET DEFINITIONS =====
+const SETS = {
+  set1: { name: '第1セット', questions: SET1, categories: ['言語','非言語','並べ替え','確率'] },
+  set2: { name: '第2セット', questions: SET2, categories: ['順序確定','語句用法','表の虫食い'] },
+  set3: { name: '第3セット', questions: SET3, categories: ['文章の構造把握','数理の構造把握'] },
+  set4: { name: '第4セット', questions: SET4_QUESTIONS, categories: ['文章読解ABC'] },
+  set5: { name: '第5セット', questions: SET5_QUESTIONS, categories: ['図表の読み取り'] },
+  set6: { name: '第6セット', questions: SET6_QUESTIONS, categories: ['英文読解'] },
+  set7: { name: '第7セット', questions: SET7_QUESTIONS, categories: ['図表の読み取り'] },
+  set8: { name: '第8セット', questions: SET8_QUESTIONS, categories: ['文章読解ABC'] },
+  set9: { name: '第9セット', questions: SET9_QUESTIONS, categories: ['文章読解ABC'] },
+  set10: { name: '第10セット', questions: SET10_QUESTIONS, categories: ['推測問題'] },
+  set11: { name: '第11セット', questions: SET11_QUESTIONS, categories: ['Docker／コンテナ'] },
+  all:  { name: '全セット混合', questions: [...SET1,...SET2,...SET3,...SET4_QUESTIONS,...SET5_QUESTIONS,...SET6_QUESTIONS,...SET7_QUESTIONS,...SET8_QUESTIONS,...SET9_QUESTIONS,...SET10_QUESTIONS,...SET11_QUESTIONS], categories: ['言語','非言語','並べ替え','確率','順序確定','語句用法','表の虫食い','文章の構造把握','数理の構造把握','文章読解ABC','図表の読み取り','英文読解','推測問題','Docker／コンテナ'] }
+};
+
+// ===== STATE =====
+let state = { mode:'normal', setKey:'set1', category:null, questions:[], currentIdx:0, answered:false, results:[], startTime:null, timerInterval:null, elapsed:0, lastMode:'normal', lastSetKey:'set1', lastCategory:null, touchStartX:0, touchStartY:0, isCountdown:false, timeLimitSeconds:0, questionStartTime:0, swipeController:null };
+
+// ===== STORAGE =====
+function getHistory(setKey) { try { return JSON.parse(localStorage.getItem('tc_hist_'+(setKey||'all'))||'[]'); } catch(e) { return []; } }
+function saveHistory(setKey, rec) { const h=getHistory(setKey); h.unshift(rec); if(h.length>5)h.length=5; localStorage.setItem('tc_hist_'+(setKey||'all'),JSON.stringify(h)); }
+function getWrongIds(setKey) { try { return JSON.parse(localStorage.getItem('tc_wrong_'+(setKey||'all'))||'[]'); } catch(e) { return []; } }
+function saveWrongIds(setKey, ids) { localStorage.setItem('tc_wrong_'+(setKey||'all'),JSON.stringify(ids)); }
+
+// ===== DARK MODE =====
+function isDark() { if(localStorage.getItem('tc_dark')!==null) return localStorage.getItem('tc_dark')==='1'; return window.matchMedia('(prefers-color-scheme:dark)').matches; }
+function applyDark(d) { document.documentElement.setAttribute('data-dark',d?'true':'false'); const l=d?'☀ ライト':'☽ ダーク'; document.getElementById('dark-btn-top').textContent=l; const q=document.getElementById('dark-btn-quiz'); if(q)q.textContent=d?'☀':'☽'; const a=document.getElementById('dark-btn-analytics'); if(a)a.textContent=d?'☀':'☽'; }
+function toggleDark() { const d=!isDark(); localStorage.setItem('tc_dark',d?'1':'0'); applyDark(d); }
+
+// ===== TIMER =====
+function startTimer() {
+  state.startTime=Date.now()-state.elapsed*1000;
+  state.timerInterval=setInterval(()=>{
+    state.elapsed=Math.floor((Date.now()-state.startTime)/1000);
+    const timerEl=document.getElementById('timer-display');
+    if(state.isCountdown&&state.timeLimitSeconds>0){
+      const remaining=state.timeLimitSeconds-state.elapsed;
+      if(remaining<=0){timerEl.textContent='0:00';timerEl.className='timer countdown urgent';handleTimeUp();return;}
+      timerEl.textContent=fmtTime(remaining);
+      timerEl.className='timer countdown'+(remaining<=60?' urgent':remaining<=120?' warning':'');
+    }else{
+      timerEl.textContent=fmtTime(state.elapsed);
+      timerEl.className='timer';
+    }
+  },500);
+}
+function stopTimer() { clearInterval(state.timerInterval); state.timerInterval=null; }
+function fmtTime(s) { return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+
+// ===== SET SELECTION =====
+function selectSet(key) {
+  state.setKey = key; state.lastSetKey = key;
+  document.querySelectorAll('.set-btn').forEach((b,i) => {
+    const keys = ['set1','set2','set3','set4','set5','set6','set7','set8','set9','set10','set11','all'];
+    b.classList.toggle('active', keys[i]===key);
+  });
+  const ms = document.getElementById('mode-section');
+  ms.classList.add('show');
+  document.getElementById('mode-section-title').textContent = SETS[key].name + ' — モードを選択';
+  // Update category section
+  const cs = document.getElementById('category-section');
+  cs.classList.remove('show');
+  cs.innerHTML = '<h3>分野を選んで練習</h3><div class="category-grid">' +
+    SETS[key].categories.map(c => {
+      const cnt = SETS[key].questions.filter(q=>q.category===c).length;
+      return `<button class="cat-btn" onclick="startMode('cat','${c}')">${c}（${cnt}問）</button>`;
+    }).join('') + '</div>';
+  ms.scrollIntoView({behavior:'smooth'});
+}
+function showCatSection() { document.getElementById('category-section').classList.add('show'); }
+
+// ===== HOME =====
+function goHome() { stopTimer(); showScreen('top'); renderTopHistory(); document.getElementById('mode-section').classList.remove('show'); document.querySelectorAll('.set-btn').forEach(b=>b.classList.remove('active')); }
+function renderTopHistory() {
+  const h = getHistory(state.lastSetKey);
+  const el = document.getElementById('top-history');
+  if(!h.length) { el.innerHTML='<div class="history-empty">まだ記録がありません</div>'; return; }
+  el.innerHTML = h.map(r=>`<div class="history-item"><span class="history-score">${r.correct}/${r.total}問 (${r.pct}%)</span><span class="history-meta">${r.set} ${r.mode} ${r.time}</span></div>`).join('');
+}
+
+// ===== START MODE =====
+function startMode(mode, category) {
+  state.lastMode=mode; state.lastCategory=category||null;
+  const set = SETS[state.setKey];
+  let qs = [];
+  if(mode==='normal') qs=[...set.questions];
+  else if(mode==='random') qs=shuffle([...set.questions]);
+  else if(mode==='weak') { qs=getEnhancedWeakQuestions(state.setKey); }
+  else if(mode==='cat') qs=shuffle(set.questions.filter(q=>q.category===category));
+
+  if(!qs.length) {
+    showScreen('quiz');
+    document.getElementById('card-inner').innerHTML='<div class="weak-empty">' + (mode==='weak' ? '弱点問題はありません！<br>全問正答率50%超です。' : '該当する問題がありません。') + '<br>通常モードで練習してみましょう！</div>';
+    document.getElementById('mode-badge').textContent='弱点復習';
+    document.getElementById('q-progress-text').textContent='';
+    document.getElementById('progress-bar').style.width='0%';
+    document.getElementById('swipe-hint').style.display='none';
+    stopTimer(); return;
+  }
+  state.mode=mode; state.category=category||null; state.questions=qs; state.currentIdx=0; state.answered=false; state.results=[]; state.elapsed=0; state.questionStartTime=Date.now(); stopTimer();
+  const ml={normal:'通常',random:'ランダム',weak:'弱点復習',cat:category||'分野別'};
+  document.getElementById('mode-badge').textContent=set.name+' / '+(ml[mode]||mode);
+  showScreen('quiz'); startTimer(); renderQuestion(); setupSwipe();
+}
+function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+// ===== RENDER QUESTION =====
+function renderQuestion() {
+  const q=state.questions[state.currentIdx], total=state.questions.length, idx=state.currentIdx;
+  document.getElementById('q-progress-text').textContent=`問${idx+1} / ${total}`;
+  document.getElementById('progress-bar').style.width=`${(idx/total)*100}%`;
+  document.getElementById('swipe-hint').style.display='none';
+  document.getElementById('main-card').classList.remove('slide-out');
+  state.answered=false;
+  state.questionStartTime=Date.now();
+
+  let h = `<div class="q-category">${q.category}・${q.subcategory}</div>`;
+  h += `<div class="q-number">問${q.id}</div>`;
+  h += `<div class="q-text">${q.question}</div>`;
+  h += '<div class="choices" id="choices-wrap">';
+  q.choices.forEach((c,i) => {
+    h += `<button class="choice-btn" id="choice-${i}" onclick="selectAnswer(${i})"><span class="choice-label">${c.label}</span><span>${c.text}</span></button>`;
+  });
+  h += '</div>';
+  h += '<div class="answer-result" id="answer-result"></div>';
+  h += `<button class="explanation-toggle" id="expl-toggle" onclick="toggleExpl()">解説を見る</button>`;
+  h += `<div class="explanation-box" id="expl-box">${q.explanation}</div>`;
+  const isLast = idx===total-1;
+  h += `<button class="next-btn" id="next-btn" onclick="nextQuestion()">${isLast?'結果を見る':'次の問題へ →'}</button>`;
+  document.getElementById('card-inner').innerHTML = h;
+}
+
+function selectAnswer(ci) {
+  if(state.answered) return;
+  state.answered=true;
+  const q=state.questions[state.currentIdx];
+  const ansIdx = q.choices.findIndex(c=>c.label===q.answer);
+  const correct = ci===ansIdx;
+  for(let i=0;i<q.choices.length;i++) {
+    const btn=document.getElementById('choice-'+i); btn.disabled=true;
+    if(i===ansIdx) btn.classList.add('highlight-correct');
+    if(i===ci&&!correct) btn.classList.add('wrong');
+    if(i===ci&&correct) btn.classList.add('correct');
+  }
+  const r=document.getElementById('answer-result'); r.classList.add('show');
+  if(correct) { r.classList.add('correct'); r.textContent='正解！'; }
+  else { r.classList.add('wrong'); r.textContent='不正解。正解は '+q.answer+' です。'; }
+  document.getElementById('expl-toggle').classList.add('show');
+  document.getElementById('next-btn').classList.add('show');
+  if(state.currentIdx<state.questions.length-1) document.getElementById('swipe-hint').style.display='block';
+  state.results.push({id:q.id, category:q.category, correct});
+  recordAttempt(q.id, state.setKey, q.category, q.subcategory, q.choices[ci].label, q.answer, correct);
+}
+function toggleExpl() { const b=document.getElementById('expl-box'),t=document.getElementById('expl-toggle'); const s=b.classList.contains('show'); if(s){b.classList.remove('show');t.textContent='解説を見る';}else{b.classList.add('show');t.textContent='解説を閉じる';setTimeout(()=>b.scrollIntoView({behavior:'smooth',block:'nearest'}),100);} }
+function nextQuestion() { const c=document.getElementById('main-card'); c.classList.add('slide-out'); setTimeout(()=>{ if(state.currentIdx>=state.questions.length-1) showResult(); else { state.currentIdx++; renderQuestion(); window.scrollTo({top:0,behavior:'smooth'}); } },200); }
+
+// ===== SWIPE =====
+function setupSwipe() {
+  if(state.swipeController) state.swipeController.abort();
+  state.swipeController=new AbortController();
+  const signal=state.swipeController.signal;
+  const c=document.getElementById('main-card');
+  c.addEventListener('touchstart',e=>{state.touchStartX=e.touches[0].clientX;state.touchStartY=e.touches[0].clientY;},{passive:true,signal});
+  c.addEventListener('touchend',e=>{if(!state.answered)return;const dx=e.changedTouches[0].clientX-state.touchStartX,dy=e.changedTouches[0].clientY-state.touchStartY;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)nextQuestion();},{passive:true,signal});
+}
+
+// ===== RESULT =====
+function showResult() {
+  stopTimer();
+  const total=state.results.length, cc=state.results.filter(r=>r.correct).length, pct=Math.round(cc/total*100);
+  saveWrongIds(state.setKey, state.results.filter(r=>!r.correct).map(r=>r.id));
+  const ml={normal:'通常',random:'ランダム',weak:'弱点',cat:state.category||'分野別'};
+  saveHistory(state.setKey, {correct:cc,total,pct,set:SETS[state.setKey].name,mode:ml[state.mode]||state.mode,time:fmtTime(state.elapsed),date:new Date().toLocaleDateString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})});
+  showScreen('result');
+  document.getElementById('result-big').innerHTML=`${cc}<span> / ${total}問</span>`;
+  document.getElementById('result-time').textContent=`所要時間: ${fmtTime(state.elapsed)}`;
+  const circ=2*Math.PI*54;
+  setTimeout(()=>{document.getElementById('circle-fill').setAttribute('stroke-dasharray',`${circ*pct/100} ${circ}`);document.getElementById('circle-label').textContent=pct+'%';},200);
+
+  // Bar chart by category
+  const cats=[...new Set(state.results.map(r=>r.category))];
+  const barEl=document.getElementById('bar-chart');
+  barEl.innerHTML=cats.map(c=>{
+    const tot=state.results.filter(r=>r.category===c).length;
+    const got=state.results.filter(r=>r.category===c&&r.correct).length;
+    const w=tot>0?Math.round(got/tot*100):0;
+    return `<div class="bar-row"><div class="bar-label">${c}</div><div class="bar-track"><div class="bar-fill" style="width:0%" data-w="${w}"></div></div><div class="bar-val">${got}/${tot}</div></div>`;
+  }).join('');
+  setTimeout(()=>{document.querySelectorAll('.bar-fill').forEach(el=>{el.style.width=el.getAttribute('data-w')+'%';});},300);
+}
+function retryMode() { startMode(state.lastMode, state.lastCategory); }
+function showScreen(n) { document.getElementById('screen-top').style.display=n==='top'?'flex':'none'; document.getElementById('screen-quiz').style.display=n==='quiz'?'block':'none'; document.getElementById('screen-result').style.display=n==='result'?'block':'none'; document.getElementById('screen-analytics').style.display=n==='analytics'?'block':'none'; }
+
+// ===== CUMULATIVE ATTEMPT TRACKING =====
+function getAllAttempts() {
+  try { return JSON.parse(localStorage.getItem('tc_all_attempts') || '[]'); }
+  catch(e) { return []; }
+}
+function saveAllAttempts(attempts) {
+  if (attempts.length > 2000) attempts = attempts.slice(attempts.length - 2000);
+  localStorage.setItem('tc_all_attempts', JSON.stringify(attempts));
+}
+function recordAttempt(qId, setKey, category, subcategory, chosen, correct_answer, isCorrect) {
+  const attempts = getAllAttempts();
+  const responseTime = state.questionStartTime ? Math.floor((Date.now() - state.questionStartTime) / 1000) : 0;
+  attempts.push({
+    qId: qId,
+    setKey: setKey,
+    category: category,
+    subcategory: subcategory,
+    chosen: chosen,
+    correct: isCorrect,
+    responseTime: responseTime,
+    timestamp: Date.now()
+  });
+  saveAllAttempts(attempts);
+}
+
+// ===== ENHANCED WEAK REVIEW =====
+function getEnhancedWeakQuestions(setKey) {
+  const attempts = getAllAttempts();
+  const set = SETS[setKey];
+  // Filter attempts relevant to this set
+  const setQIds = new Set(set.questions.map(q => q.id));
+  const relevant = attempts.filter(a => setQIds.has(a.qId));
+
+  if (!relevant.length) {
+    // Fallback to legacy wrong IDs
+    const ids = getWrongIds(setKey);
+    return ids.length ? shuffle(set.questions.filter(q => ids.includes(q.id))) : [];
+  }
+
+  // Calculate per-question accuracy
+  const qStats = {};
+  relevant.forEach(a => {
+    if (!qStats[a.qId]) qStats[a.qId] = { total: 0, correct: 0 };
+    qStats[a.qId].total++;
+    if (a.correct) qStats[a.qId].correct++;
+  });
+
+  // Filter questions with accuracy <= 50%
+  const weakIds = Object.entries(qStats)
+    .filter(([id, s]) => (s.correct / s.total) <= 0.5)
+    .sort((a, b) => (a[1].correct / a[1].total) - (b[1].correct / b[1].total))
+    .slice(0, 20)
+    .map(([id]) => Number(id));
+
+  if (!weakIds.length) {
+    // Also check legacy wrong IDs as fallback
+    const legacyIds = getWrongIds(setKey);
+    if (legacyIds.length) return shuffle(set.questions.filter(q => legacyIds.includes(q.id)));
+    return [];
+  }
+
+  return shuffle(set.questions.filter(q => weakIds.includes(q.id)));
+}
+
+// ===== RADAR CHART =====
+function renderRadarSection(attempts) {
+  const shortNames = {
+    '文章の構造把握': '文章構造',
+    '数理の構造把握': '数理構造',
+    '文章読解ABC': '読解ABC',
+    '図表の読み取り': '図表読取',
+    '表の虫食い': '表虫食い'
+  };
+  const catMap = {};
+  attempts.forEach(a => {
+    if (!catMap[a.category]) catMap[a.category] = { total: 0, correct: 0 };
+    catMap[a.category].total++;
+    if (a.correct) catMap[a.category].correct++;
+  });
+  const catData = Object.entries(catMap).map(([name, s]) => ({
+    name: name,
+    rate: s.total > 0 ? s.correct / s.total : 0,
+    count: s.total
+  }));
+  if (catData.length < 3) {
+    return '<div class="analytics-card"><h3>能力プロフィール</h3><p style="text-align:center;color:var(--text-sub);font-size:0.85rem;padding:12px;">データが不十分です（3カテゴリ以上の回答が必要）</p></div>';
+  }
+  const n = catData.length;
+  const cx = 150, cy = 150, R = 120;
+  let svg = '';
+  // Grid: concentric polygons at 20%, 40%, 60%, 80%, 100%
+  [0.2, 0.4, 0.6, 0.8, 1.0].forEach(frac => {
+    const r = R * frac;
+    let pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+      pts.push((cx + r * Math.cos(angle)).toFixed(1) + ',' + (cy + r * Math.sin(angle)).toFixed(1));
+    }
+    svg += '<polygon points="' + pts.join(' ') + '" class="radar-grid"/>';
+  });
+  // Axis lines and labels
+  catData.forEach((d, i) => {
+    const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+    const x2 = cx + R * Math.cos(angle);
+    const y2 = cy + R * Math.sin(angle);
+    svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" class="radar-axis"/>';
+    const labelR = R + 14;
+    const lx = cx + labelR * Math.cos(angle);
+    const ly = cy + labelR * Math.sin(angle);
+    const label = shortNames[d.name] || d.name;
+    let anchor = 'middle';
+    if (Math.cos(angle) > 0.3) anchor = 'start';
+    else if (Math.cos(angle) < -0.3) anchor = 'end';
+    let dy = '0.35em';
+    if (Math.sin(angle) < -0.3) dy = '0em';
+    else if (Math.sin(angle) > 0.3) dy = '0.7em';
+    svg += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" class="radar-label" text-anchor="' + anchor + '" dy="' + dy + '">' + label + '</text>';
+  });
+  // Data polygon
+  let dataPts = [];
+  catData.forEach((d, i) => {
+    const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+    const r = R * d.rate;
+    dataPts.push((cx + r * Math.cos(angle)).toFixed(1) + ',' + (cy + r * Math.sin(angle)).toFixed(1));
+  });
+  svg += '<polygon points="' + dataPts.join(' ') + '" class="radar-area"/>';
+  // Data dots
+  catData.forEach((d, i) => {
+    const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+    const r = R * d.rate;
+    const dx = cx + r * Math.cos(angle);
+    const dy2 = cy + r * Math.sin(angle);
+    svg += '<circle cx="' + dx.toFixed(1) + '" cy="' + dy2.toFixed(1) + '" r="3" class="radar-dot"/>';
+  });
+  return '<div class="analytics-card"><h3>能力プロフィール</h3><div style="text-align:center;"><svg id="radar-chart" viewBox="0 0 300 300" width="300" height="300">' + svg + '</svg></div></div>';
+}
+
+// ===== HEATMAP CALENDAR =====
+function renderHeatmapSection(attempts) {
+  const isDarkMode = document.documentElement.getAttribute('data-dark') === 'true';
+  const colors = isDarkMode
+    ? ['#161B22', '#0E4429', '#006D32', '#26A641', '#39D353']
+    : ['var(--border)', '#9BE9A8', '#40C463', '#30A14E', '#216E39'];
+
+  // Aggregate daily answer counts from timestamps
+  const dayCounts = {};
+  attempts.forEach(a => {
+    const d = new Date(a.timestamp);
+    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    dayCounts[key] = (dayCounts[key] || 0) + 1;
+  });
+
+  // Generate array of last 90 days
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = [];
+  for (let i = 89; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    days.push(d);
+  }
+
+  // Find the Sunday on or before the first day (to align columns)
+  const firstDay = days[0];
+  const startDow = firstDay.getDay(); // 0=Sun
+  const paddedDays = [];
+  // Add empty padding for days before the first day in that week
+  for (let i = 0; i < startDow; i++) {
+    paddedDays.push(null);
+  }
+  days.forEach(d => paddedDays.push(d));
+
+  // Calculate weeks
+  const totalSlots = paddedDays.length;
+  const numWeeks = Math.ceil(totalSlots / 7);
+
+  function getColor(count) {
+    if (count === 0) return colors[0];
+    if (count <= 3) return colors[1];
+    if (count <= 9) return colors[2];
+    if (count <= 19) return colors[3];
+    return colors[4];
+  }
+
+  function formatDate(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  const cellSize = 12, gap = 2, marginLeft = 30, marginTop = 4;
+  const svgW = marginLeft + numWeeks * (cellSize + gap);
+  const svgH = marginTop + 7 * (cellSize + gap) + 28; // extra space for legend
+
+  let svg = '';
+
+  // Day-of-week labels (Sun-Sat)
+  const dowLabels = ['日', '月', '火', '水', '木', '金', '土'];
+  dowLabels.forEach((label, i) => {
+    const y = marginTop + i * (cellSize + gap) + cellSize * 0.75;
+    svg += '<text x="' + (marginLeft - 4) + '" y="' + y + '" text-anchor="end" style="font-size:9px;fill:var(--text-sub);font-family:var(--font);">' + label + '</text>';
+  });
+
+  // Draw cells
+  let totalAnswersInRange = 0;
+  let studyDays = 0;
+  for (let slotIdx = 0; slotIdx < totalSlots; slotIdx++) {
+    const d = paddedDays[slotIdx];
+    if (!d) continue;
+    const col = Math.floor(slotIdx / 7);
+    const row = slotIdx % 7;
+    const x = marginLeft + col * (cellSize + gap);
+    const y = marginTop + row * (cellSize + gap);
+    const key = formatDate(d);
+    const count = dayCounts[key] || 0;
+    if (count > 0) {
+      totalAnswersInRange += count;
+      studyDays++;
+    }
+    const color = getColor(count);
+    const tooltip = key + ': ' + count + '問回答';
+    svg += '<rect x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" rx="2" fill="' + color + '" stroke="none"><title>' + tooltip + '</title></rect>';
+  }
+
+  // Legend at bottom
+  const legendY = marginTop + 7 * (cellSize + gap) + 6;
+  const legendLabels = ['少', '', '', '', '', '多'];
+  const legendStartX = marginLeft;
+  svg += '<text x="' + legendStartX + '" y="' + (legendY + cellSize * 0.75) + '" style="font-size:9px;fill:var(--text-sub);font-family:var(--font);">少</text>';
+  const legendBoxStart = legendStartX + 16;
+  colors.forEach((c, i) => {
+    const lx = legendBoxStart + i * (cellSize + gap);
+    svg += '<rect x="' + lx + '" y="' + legendY + '" width="' + cellSize + '" height="' + cellSize + '" rx="2" fill="' + c + '" stroke="none"/>';
+  });
+  const afterLegend = legendBoxStart + colors.length * (cellSize + gap) + 4;
+  svg += '<text x="' + afterLegend + '" y="' + (legendY + cellSize * 0.75) + '" style="font-size:9px;fill:var(--text-sub);font-family:var(--font);">多</text>';
+
+  return '<div class="analytics-card"><h3>学習カレンダー（直近90日）</h3>' +
+    '<div style="overflow-x:auto;">' +
+    '<svg id="heatmap-cal" viewBox="0 0 ' + svgW + ' ' + svgH + '">' + svg + '</svg>' +
+    '</div>' +
+    '<div class="heatmap-summary">合計: ' + totalAnswersInRange + '問 / ' + studyDays + '日間学習</div></div>';
+}
+
+// ===== ANALYTICS DASHBOARD =====
+function renderHistogramSection(attempts) {
+  const qStats = {};
+  attempts.forEach(a => {
+    if (!qStats[a.qId]) qStats[a.qId] = { total: 0, correct: 0 };
+    qStats[a.qId].total++;
+    if (a.correct) qStats[a.qId].correct++;
+  });
+  const qualified = Object.values(qStats).filter(s => s.total >= 2);
+  let h = '<div class="analytics-card"><h3>正答率分布</h3>';
+  h += '<p class="hist-desc">2回以上回答した問題の正答率分布</p>';
+  if (qualified.length === 0) {
+    h += '<p class="weak-none">2回以上回答した問題がありません</p></div>';
+    return h;
+  }
+  const buckets = [0,0,0,0,0,0];
+  qualified.forEach(s => {
+    const rate = s.correct / s.total * 100;
+    if (rate === 0) buckets[0]++;
+    else if (rate <= 25) buckets[1]++;
+    else if (rate <= 50) buckets[2]++;
+    else if (rate <= 75) buckets[3]++;
+    else if (rate < 100) buckets[4]++;
+    else buckets[5]++;
+  });
+  const maxCount = Math.max(...buckets, 1);
+  const colors = ['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#16A34A'];
+  const labels = ['0%','1-25%','26-50%','51-75%','76-99%','100%'];
+  h += '<div class="hist-chart">';
+  for (let i = 0; i < 6; i++) {
+    const pct = buckets[i] / maxCount * 100;
+    h += '<div class="hist-bar-wrap">';
+    h += `<div class="hist-count">${buckets[i]}</div>`;
+    h += `<div class="hist-bar" style="height:${Math.max(pct, 1.3)}%;background:${colors[i]}"></div>`;
+    h += `<div class="hist-label">${labels[i]}</div>`;
+    h += '</div>';
+  }
+  h += '</div></div>';
+  return h;
+}
+
+function showAnalytics() {
+  const attempts = getAllAttempts();
+  showScreen('analytics');
+  const container = document.getElementById('analytics-content');
+
+  if (!attempts.length) {
+    container.innerHTML = '<div class="analytics-empty"><div class="empty-icon">&#x1F4CA;</div><div class="empty-text">まだ解答記録がありません。<br>問題を解くと、ここに学習分析が表示されます。</div></div>' +
+      '<button class="analytics-home-btn" onclick="goHome()" style="margin-top:20px">ホームへ戻る</button>';
+    return;
+  }
+
+  const totalAnswers = attempts.length;
+  const totalCorrect = attempts.filter(a => a.correct).length;
+  const totalPct = totalAnswers > 0 ? (totalCorrect / totalAnswers * 100).toFixed(1) : '0.0';
+  const uniqueDays = new Set(attempts.map(a => new Date(a.timestamp).toLocaleDateString('ja-JP'))).size;
+
+  let html = '';
+
+  // 1. Overview
+  html += '<div class="analytics-card"><h3>概要</h3><div class="analytics-stat-grid">';
+  html += `<div class="analytics-stat"><div class="stat-value">${totalAnswers}</div><div class="stat-label">総回答数</div></div>`;
+  html += `<div class="analytics-stat"><div class="stat-value">${totalPct}%</div><div class="stat-label">総正答率</div></div>`;
+  html += `<div class="analytics-stat"><div class="stat-value">${uniqueDays}</div><div class="stat-label">学習日数</div></div>`;
+  html += '</div></div>';
+
+  // 1.5 Radar chart (能力プロフィール)
+  html += renderRadarSection(attempts);
+
+  // 1.6 Heatmap calendar (学習カレンダー)
+  html += renderHeatmapSection(attempts);
+
+  // 2. Set-level accuracy
+  html += '<div class="analytics-card"><h3>セット別正答率</h3>';
+  const setKeys = Object.keys(SETS).filter(k => k !== 'all');
+  setKeys.forEach(sk => {
+    const sa = attempts.filter(a => a.setKey === sk);
+    if (!sa.length) return;
+    const sc = sa.filter(a => a.correct).length;
+    const sp = Math.round(sc / sa.length * 100);
+    const barClass = sp >= 80 ? 'high' : sp >= 60 ? 'mid' : sp >= 40 ? 'low' : 'vlow';
+    html += `<div class="a-bar-row"><div class="a-bar-label">${SETS[sk].name}</div><div class="a-bar-track"><div class="a-bar-fill ${barClass}" style="width:${sp}%"></div></div><div class="a-bar-val">${sp}% (${sa.length}問)</div></div>`;
+  });
+  html += '</div>';
+
+  // 3. Category-level accuracy (sorted low to high)
+  html += '<div class="analytics-card"><h3>カテゴリ別正答率</h3>';
+  const catMap = {};
+  attempts.forEach(a => {
+    if (!catMap[a.category]) catMap[a.category] = { total: 0, correct: 0 };
+    catMap[a.category].total++;
+    if (a.correct) catMap[a.category].correct++;
+  });
+  const catEntries = Object.entries(catMap).sort((a, b) => (a[1].correct / a[1].total) - (b[1].correct / b[1].total));
+  catEntries.forEach(([cat, s]) => {
+    const cp = Math.round(s.correct / s.total * 100);
+    const barClass = cp >= 80 ? 'high' : cp >= 60 ? 'mid' : cp >= 40 ? 'low' : 'vlow';
+    html += `<div class="a-bar-row"><div class="a-bar-label">${cat}</div><div class="a-bar-track"><div class="a-bar-fill ${barClass}" style="width:${cp}%"></div></div><div class="a-bar-val">${cp}% (${s.total}問)</div></div>`;
+  });
+  html += '</div>';
+
+  // 4. Weakest subcategories (top 5, min 5 attempts)
+  html += '<div class="analytics-card"><h3>弱点 TOP5</h3>';
+  const subMap = {};
+  attempts.forEach(a => {
+    const key = a.subcategory || a.category;
+    if (!subMap[key]) subMap[key] = { total: 0, correct: 0, category: a.category };
+    subMap[key].total++;
+    if (a.correct) subMap[key].correct++;
+  });
+  const weakSubs = Object.entries(subMap)
+    .filter(([, s]) => s.total >= 5)
+    .sort((a, b) => (a[1].correct / a[1].total) - (b[1].correct / b[1].total))
+    .slice(0, 5);
+
+  if (weakSubs.length) {
+    html += '<div class="weak-list">';
+    weakSubs.forEach(([name, s]) => {
+      const wp = (s.correct / s.total * 100).toFixed(1);
+      html += `<div class="weak-item"><div><div class="weak-name">${name}</div><div class="weak-detail">${s.category} / ${s.total}問回答</div></div><div class="weak-pct">${wp}%</div></div>`;
+    });
+    html += '</div>';
+  } else {
+    html += '<div class="weak-none">5問以上回答した分野がまだありません</div>';
+  }
+  html += '</div>';
+
+  // 4.5 Histogram (正答率分布)
+  html += renderHistogramSection(attempts);
+
+  // 5. Trend chart (last 10 sessions from history)
+  html += '<div class="analytics-card"><h3>直近の学習推移</h3>';
+  const allSessions = [];
+  Object.keys(SETS).forEach(sk => {
+    const h = getHistory(sk);
+    h.forEach(r => allSessions.push({ ...r, setKey: sk }));
+  });
+  // Sort by date (most recent first, then reverse for chart)
+  // History items have a 'date' field like "03/18 14:30"
+  // We'll use the order they appear and take last 10
+  const recentSessions = allSessions.slice(0, 10).reverse();
+
+  if (recentSessions.length >= 2) {
+    const svgW = 460, svgH = 180, padL = 40, padR = 20, padT = 20, padB = 40;
+    const chartW = svgW - padL - padR, chartH = svgH - padT - padB;
+    const n = recentSessions.length;
+    const stepX = chartW / Math.max(n - 1, 1);
+
+    let svgContent = `<div class="trend-chart-wrap"><svg class="trend-chart" viewBox="0 0 ${svgW} ${svgH}">`;
+    // Grid lines
+    for (let p = 0; p <= 100; p += 25) {
+      const y = padT + chartH - (p / 100) * chartH;
+      svgContent += `<line x1="${padL}" y1="${y}" x2="${svgW - padR}" y2="${y}" class="trend-grid-line"/>`;
+      svgContent += `<text x="${padL - 5}" y="${y + 4}" class="trend-label-y">${p}%</text>`;
+    }
+
+    // Area + Line
+    let points = [];
+    recentSessions.forEach((s, i) => {
+      const x = padL + i * stepX;
+      const y = padT + chartH - (s.pct / 100) * chartH;
+      points.push({ x, y });
+    });
+    const areaPath = `M${points[0].x},${padT + chartH} ` + points.map(p => `L${p.x},${p.y}`).join(' ') + ` L${points[points.length - 1].x},${padT + chartH} Z`;
+    svgContent += `<path d="${areaPath}" class="trend-area"/>`;
+    const linePath = points.map((p, i) => (i === 0 ? 'M' : 'L') + `${p.x},${p.y}`).join(' ');
+    svgContent += `<path d="${linePath}" class="trend-line"/>`;
+    points.forEach((p, i) => {
+      svgContent += `<circle cx="${p.x}" cy="${p.y}" r="4" class="trend-dot"/>`;
+      svgContent += `<text x="${p.x}" y="${p.y - 8}" class="trend-label" text-anchor="middle">${recentSessions[i].pct}%</text>`;
+    });
+
+    // X-axis labels
+    recentSessions.forEach((s, i) => {
+      const x = padL + i * stepX;
+      const label = s.set ? s.set.replace(/第|セット/g, '').trim() : '';
+      svgContent += `<text x="${x}" y="${svgH - 5}" class="trend-label" text-anchor="middle">${label || s.setKey}</text>`;
+    });
+    svgContent += '</svg></div>';
+    html += svgContent;
+  } else {
+    html += '<div class="weak-none">推移グラフには2回以上のセッション記録が必要です</div>';
+  }
+  html += '</div>';
+
+  // Export button
+  html += '<button class="export-btn" onclick="exportAnalytics()">&#x1F4E5; 分析結果をエクスポート</button>';
+  html += '<button class="analytics-home-btn" onclick="goHome()">ホームへ戻る</button>';
+
+  container.innerHTML = html;
+}
+
+// ===== MARKDOWN EXPORT =====
+function exportAnalytics() {
+  const attempts = getAllAttempts();
+  if (!attempts.length) return;
+
+  const now = new Date();
+  const dateStr = now.toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(/\//g, '-');
+  const fileDateStr = now.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+
+  const totalAnswers = attempts.length;
+  const totalCorrect = attempts.filter(a => a.correct).length;
+  const totalPct = totalAnswers > 0 ? (totalCorrect / totalAnswers * 100).toFixed(1) : '0.0';
+  const uniqueDays = new Set(attempts.map(a => new Date(a.timestamp).toLocaleDateString('ja-JP'))).size;
+
+  let md = `# テストセンター練習 ─ 学習分析レポート\n\n生成日時: ${dateStr}\n\n`;
+  md += `## 概要\n- 総回答数: ${totalAnswers}問\n- 総正答率: ${totalPct}%\n- 学習日数: ${uniqueDays}日\n\n`;
+
+  // Set accuracy
+  md += '## セット別正答率\n| セット | 回答数 | 正答率 |\n|---|---|---|\n';
+  const setKeys = Object.keys(SETS).filter(k => k !== 'all');
+  setKeys.forEach(sk => {
+    const sa = attempts.filter(a => a.setKey === sk);
+    if (!sa.length) return;
+    const sc = sa.filter(a => a.correct).length;
+    const sp = (sc / sa.length * 100).toFixed(1);
+    md += `| ${SETS[sk].name} | ${sa.length} | ${sp}% |\n`;
+  });
+  md += '\n';
+
+  // Category accuracy
+  md += '## カテゴリ別正答率\n| カテゴリ | 回答数 | 正答率 |\n|---|---|---|\n';
+  const catMap = {};
+  attempts.forEach(a => {
+    if (!catMap[a.category]) catMap[a.category] = { total: 0, correct: 0 };
+    catMap[a.category].total++;
+    if (a.correct) catMap[a.category].correct++;
+  });
+  Object.entries(catMap)
+    .sort((a, b) => (a[1].correct / a[1].total) - (b[1].correct / b[1].total))
+    .forEach(([cat, s]) => {
+      md += `| ${cat} | ${s.total} | ${(s.correct / s.total * 100).toFixed(1)}% |\n`;
+    });
+  md += '\n';
+
+  // Weak subcategories
+  md += '## 弱点分析（正答率の低い問題）\n| 問題 | カテゴリ | 回答数 | 正答率 |\n|---|---|---|---|\n';
+  const subMap = {};
+  attempts.forEach(a => {
+    const key = a.subcategory || a.category;
+    if (!subMap[key]) subMap[key] = { total: 0, correct: 0, category: a.category };
+    subMap[key].total++;
+    if (a.correct) subMap[key].correct++;
+  });
+  Object.entries(subMap)
+    .filter(([, s]) => s.total >= 3)
+    .sort((a, b) => (a[1].correct / a[1].total) - (b[1].correct / b[1].total))
+    .slice(0, 10)
+    .forEach(([name, s]) => {
+      md += `| ${name} | ${s.category} | ${s.total} | ${(s.correct / s.total * 100).toFixed(1)}% |\n`;
+    });
+  md += '\n';
+
+  // Session history
+  md += '## 学習推移\n| 日時 | セット | 問題数 | 正答率 |\n|---|---|---|---|\n';
+  const allSessions = [];
+  Object.keys(SETS).forEach(sk => {
+    getHistory(sk).forEach(r => allSessions.push({ ...r, setKey: sk }));
+  });
+  allSessions.slice(0, 20).forEach(s => {
+    md += `| ${s.date || '-'} | ${s.set || SETS[s.setKey]?.name || s.setKey} | ${s.total} | ${s.pct}% |\n`;
+  });
+
+  // Download
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `学習分析_${fileDateStr}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ===== TEST SCHEDULE PANEL =====
+function renderTestSchedule() {
+  if(typeof TEST_SCHEDULE==='undefined'||!TEST_SCHEDULE.length) return;
+  const container=document.getElementById('schedule-container');
+  if(!container) return;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const sorted=[...TEST_SCHEDULE].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  let html='<h3>次のテスト</h3><div class="schedule-cards">';
+  sorted.forEach(item=>{
+    const testDate=new Date(item.date); testDate.setHours(0,0,0,0);
+    const diffDays=Math.ceil((testDate-today)/(1000*60*60*24));
+    let urgencyClass='normal';
+    if(diffDays<0) urgencyClass='past';
+    else if(diffDays<=7) urgencyClass='urgent';
+    else if(diffDays<=14) urgencyClass='warning';
+    const dateStr=testDate.toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});
+    const typeClass=item.type==='テストセンター'?'tc':'web';
+    let daysLabel='';
+    if(diffDays<0) daysLabel='<div class="days-num">'+Math.abs(diffDays)+'</div><div class="days-label">日前</div>';
+    else if(diffDays===0) daysLabel='<div class="days-num">今日</div>';
+    else daysLabel='<div class="days-num">'+diffDays+'</div><div class="days-label">日後</div>';
+    html+='<div class="schedule-card '+urgencyClass+'">';
+    html+='<div class="schedule-days '+urgencyClass+'">'+daysLabel+'</div>';
+    html+='<div class="schedule-info">';
+    html+='<div class="schedule-company">'+item.company+'</div>';
+    html+='<div class="schedule-date">'+dateStr+'</div>';
+    if(item.content) html+='<div class="schedule-detail">'+item.content+'</div>';
+    if(item.venue&&item.venue!=='オンライン') html+='<div class="schedule-detail">&#x1F4CD; '+item.venue+'</div>';
+    html+='</div>';
+    html+='<div class="schedule-type-badge '+typeClass+'">'+item.type+'</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  container.innerHTML=html;
+  container.style.display='block';
+}
+
+// ===== COMPANY TEST MAP =====
+function renderCompanySection() {
+  if(typeof COMPANY_TEST_MAP==='undefined'||!COMPANY_TEST_MAP.length) return;
+  const container=document.getElementById('company-container');
+  if(!container) return;
+  const partLabels={verbal:'言',nonverbal:'数',english:'EN',structure:'構'};
+  let html='<button class="company-toggle" onclick="toggleCompanyList()">';
+  html+='<span>企業別対策</span><span class="toggle-arrow">&#x25BC;</span></button>';
+  html+='<div class="company-list" id="company-list">';
+  COMPANY_TEST_MAP.forEach((comp,idx)=>{
+    const confLabel=comp.confidence==='confirmed'?'確定':comp.confidence==='estimated'?'推定':'未確認';
+    let badges='';
+    Object.entries(partLabels).forEach(([key,label])=>{
+      const val=comp.parts[key];
+      if(val===true) badges+='<span class="part-badge active">'+label+'</span>';
+      else if(val===false) badges+='<span class="part-badge inactive">'+label+'</span>';
+      else badges+='<span class="part-badge unknown">'+label+'?</span>';
+    });
+    let recSets=[];
+    if(typeof PART_TO_SETS!=='undefined'){
+      Object.entries(comp.parts).forEach(([key,val])=>{
+        if(val===true&&PART_TO_SETS[key]) PART_TO_SETS[key].forEach(s=>{if(!recSets.includes(s))recSets.push(s);});
+      });
+    }
+    let setsHtml='';
+    if(recSets.length){
+      setsHtml='<div class="company-sets" id="company-sets-'+idx+'"><h4>推薦セット</h4><div class="company-set-btns">';
+      recSets.forEach(s=>{setsHtml+='<button class="company-set-btn" onclick="selectSet(\''+s+'\');event.stopPropagation();">'+SETS[s].name+'</button>';});
+      setsHtml+='</div></div>';
+    }
+    html+='<div class="company-card" onclick="toggleCompanySets('+idx+')">';
+    html+='<div class="company-card-header"><div class="company-card-name">'+comp.company+'</div>';
+    html+='<span class="company-format '+comp.confidence+'">'+comp.format+'（'+confLabel+'）</span></div>';
+    html+='<div class="part-badges">'+badges+'</div>';
+    html+=setsHtml+'</div>';
+  });
+  html+='</div>';
+  container.innerHTML=html;
+  container.style.display='block';
+}
+function toggleCompanyList(){
+  const list=document.getElementById('company-list');
+  const btn=document.querySelector('.company-toggle');
+  list.classList.toggle('show'); btn.classList.toggle('open');
+}
+function toggleCompanySets(idx){
+  const el=document.getElementById('company-sets-'+idx);
+  if(el) el.classList.toggle('show');
+}
+
+// ===== COUNTDOWN TIMER =====
+function toggleCountdown(){
+  const checked=document.getElementById('countdown-toggle').checked;
+  document.getElementById('timer-presets').style.display=checked?'flex':'none';
+  state.isCountdown=checked;
+  if(!checked){state.timeLimitSeconds=0;document.querySelectorAll('.timer-preset').forEach(b=>b.classList.remove('active'));}
+}
+function setTimeLimit(seconds,btn){
+  state.timeLimitSeconds=seconds;
+  document.querySelectorAll('.timer-preset').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+function handleTimeUp(){
+  stopTimer();
+  const total=state.questions.length;
+  for(let i=state.currentIdx;i<total;i++){
+    const q=state.questions[i];
+    if(!state.results.find(r=>r.id===q.id)){
+      state.results.push({id:q.id,category:q.category,correct:false});
+      recordAttempt(q.id,state.setKey,q.category,q.subcategory,'-',q.answer,false);
+    }
+  }
+  showResult();
+}
+
+// ===== SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ===== INIT =====
+applyDark(isDark()); renderTopHistory(); renderTestSchedule(); renderCompanySection(); showScreen('top');
+</script>
+</body>
+</html>
