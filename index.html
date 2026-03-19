@@ -318,12 +318,39 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .timer.countdown.warning { color: #F59E0B; }
 .timer.countdown.urgent { animation: timerBlink 0.5s ease infinite; color: #DC2626; }
 @keyframes timerBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+/* Sync UI */
+.sync-toggle-top { position: fixed; top: 12px; left: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; color: var(--text); z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 4px; }
+.sync-toggle-top .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #94A3B8; flex-shrink: 0; }
+.sync-toggle-top .sync-dot.active { background: #16A34A; }
+.sync-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
+.sync-modal-overlay.show { display: flex; }
+.sync-modal { background: var(--card); border-radius: var(--radius); padding: 24px 20px; max-width: 380px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.2); animation: fadeIn 0.25s ease; }
+.sync-modal h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 16px; text-align: center; }
+.sync-modal p { font-size: 0.82rem; color: var(--text-sub); margin-bottom: 12px; line-height: 1.6; }
+.sync-input-wrap { display: flex; gap: 8px; margin-bottom: 12px; }
+.sync-input { flex: 1; border: 2px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 1.1rem; font-family: 'Courier New', monospace; text-align: center; letter-spacing: 4px; text-transform: uppercase; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.2s; }
+.sync-input:focus { border-color: var(--accent); }
+.sync-btn { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 10px 16px; font-size: 0.9rem; font-weight: 700; font-family: var(--font); cursor: pointer; transition: background 0.15s; }
+.sync-btn:hover { background: var(--accent-dark); }
+.sync-btn-secondary { background: var(--bg); color: var(--accent); border: 2px solid var(--accent); }
+.sync-btn-secondary:hover { background: var(--accent-light); }
+.sync-btn-danger { background: var(--wrong); }
+.sync-btn-danger:hover { background: #B91C1C; }
+.sync-status { font-size: 0.78rem; color: var(--text-sub); text-align: center; margin-top: 8px; min-height: 20px; }
+.sync-status.error { color: var(--wrong); }
+.sync-status.success { color: var(--correct); }
+.sync-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.sync-current { background: var(--bg); border-radius: 10px; padding: 12px; margin-bottom: 12px; text-align: center; }
+.sync-current .sync-code-display { font-size: 1.4rem; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 6px; color: var(--accent); }
+.sync-current .sync-code-label { font-size: 0.75rem; color: var(--text-sub); margin-bottom: 4px; }
+.sync-generate { font-size: 0.78rem; color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline; font-family: var(--font); margin-bottom: 8px; }
 </style>
 </head>
 <body>
 
 <div id="screen-top">
   <button class="dark-toggle-top" onclick="toggleDark()" id="dark-btn-top"></button>
+  <button class="sync-toggle-top" onclick="openSyncModal()" id="sync-btn-top"><span class="sync-dot" id="sync-dot"></span><span id="sync-btn-label">同期</span></button>
   <div style="height:44px"></div>
   <div class="app-title">テストセンター練習</div>
   <div class="app-subtitle">全309問 ── 10セット対応</div>
@@ -485,6 +512,12 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
   <div id="analytics-content"></div>
 </div>
 
+<div class="sync-modal-overlay" id="sync-modal" onclick="closeSyncModal(event)">
+  <div class="sync-modal" onclick="event.stopPropagation()">
+    <h3>&#x1F504; データ同期</h3>
+    <div id="sync-modal-content"></div>
+  </div>
+</div>
 <script src="quiz_data_set4.js"></script>
 <script src="quiz_data_set5.js"></script>
 <script src="quiz_data_set6.js"></script>
@@ -494,6 +527,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 <script src="quiz_data_set10.js"></script>
 <script src="quiz_data_set11.js"></script>
 <script src="test_schedule_data.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script>
 // ===== QUESTION DATA (SET1 - normalized) =====
 const SET1_RAW = [
@@ -597,9 +632,9 @@ let state = { mode:'normal', setKey:'set1', category:null, questions:[], current
 
 // ===== STORAGE =====
 function getHistory(setKey) { try { return JSON.parse(localStorage.getItem('tc_hist_'+(setKey||'all'))||'[]'); } catch(e) { return []; } }
-function saveHistory(setKey, rec) { const h=getHistory(setKey); h.unshift(rec); if(h.length>5)h.length=5; localStorage.setItem('tc_hist_'+(setKey||'all'),JSON.stringify(h)); }
+function saveHistory(setKey, rec) { const h=getHistory(setKey); h.unshift(rec); if(h.length>5)h.length=5; localStorage.setItem('tc_hist_'+(setKey||'all'),JSON.stringify(h)); scheduleSyncPush(); }
 function getWrongIds(setKey) { try { return JSON.parse(localStorage.getItem('tc_wrong_'+(setKey||'all'))||'[]'); } catch(e) { return []; } }
-function saveWrongIds(setKey, ids) { localStorage.setItem('tc_wrong_'+(setKey||'all'),JSON.stringify(ids)); }
+function saveWrongIds(setKey, ids) { localStorage.setItem('tc_wrong_'+(setKey||'all'),JSON.stringify(ids)); scheduleSyncPush(); }
 
 // ===== DARK MODE =====
 function isDark() { if(localStorage.getItem('tc_dark')!==null) return localStorage.getItem('tc_dark')==='1'; return window.matchMedia('(prefers-color-scheme:dark)').matches; }
@@ -778,6 +813,7 @@ function getAllAttempts() {
 function saveAllAttempts(attempts) {
   if (attempts.length > 2000) attempts = attempts.slice(attempts.length - 2000);
   localStorage.setItem('tc_all_attempts', JSON.stringify(attempts));
+  scheduleSyncPush();
 }
 function recordAttempt(qId, setKey, category, subcategory, chosen, correct_answer, isCorrect) {
   const attempts = getAllAttempts();
@@ -1288,6 +1324,93 @@ function exportAnalytics() {
   URL.revokeObjectURL(url);
 }
 
+// ===== FIREBASE SYNC =====
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDn-i8GLBHIlHdo_Jf2nr_nq9lpQ7UK11A",
+  authDomain: "spi-practice-sync.firebaseapp.com",
+  databaseURL: "https://spi-practice-sync-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "spi-practice-sync",
+  storageBucket: "spi-practice-sync.firebasestorage.app",
+  messagingSenderId: "754560569522",
+  appId: "1:754560569522:web:2254ef3a4cf808807eb9ab"
+};
+let syncDb=null,syncRef=null,syncCode=null,syncDebounceTimer=null,syncPaused=false;
+function initSync(){
+  if(typeof firebase==='undefined'){console.warn('Firebase SDK not loaded');return;}
+  if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
+  syncDb=firebase.database();
+  syncCode=localStorage.getItem('tc_sync_code')||null;
+  if(syncCode)attachSyncListeners(syncCode);
+  updateSyncUI();
+}
+function generateSyncCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
+function connectSync(code){
+  code=code.toUpperCase().trim();
+  if(code.length!==6||!/^[A-Z0-9]{6}$/.test(code)){setSyncStatus('コードは英数字6文字で入力してください','error');return;}
+  detachSyncListeners();
+  syncCode=code;localStorage.setItem('tc_sync_code',code);
+  pushAllToFirebase().then(()=>{attachSyncListeners(code);updateSyncUI();setSyncStatus('接続しました！','success');renderSyncModalContent();}).catch(err=>{setSyncStatus('接続エラー','error');});
+}
+function disconnectSync(){detachSyncListeners();syncCode=null;localStorage.removeItem('tc_sync_code');updateSyncUI();renderSyncModalContent();}
+function detachSyncListeners(){if(syncRef){syncRef.off();syncRef=null;}}
+function attachSyncListeners(code){
+  if(!syncDb)return;
+  syncRef=syncDb.ref('sync/'+code);
+  syncRef.on('value',snapshot=>{
+    if(syncPaused)return;
+    const rd=snapshot.val();if(!rd)return;
+    syncPaused=true;
+    if(rd.tc_all_attempts){
+      const la=getAllAttempts();
+      const ra=typeof rd.tc_all_attempts==='string'?JSON.parse(rd.tc_all_attempts):rd.tc_all_attempts;
+      localStorage.setItem('tc_all_attempts',JSON.stringify(mergeAttempts(la,ra)));
+    }
+    const sk=['set1','set2','set3','set4','set5','set6','set7','set8','set9','set10','set11','all'];
+    sk.forEach(s=>{
+      const hk='tc_hist_'+s;
+      if(rd[hk]){const lh=getHistory(s);const rh=typeof rd[hk]==='string'?JSON.parse(rd[hk]):rd[hk];localStorage.setItem(hk,JSON.stringify(mergeHistory(lh,rh)));}
+      const wk='tc_wrong_'+s;
+      if(rd[wk]){const lw=getWrongIds(s);const rw=typeof rd[wk]==='string'?JSON.parse(rd[wk]):rd[wk];localStorage.setItem(wk,JSON.stringify([...new Set([...lw,...rw])]));}
+    });
+    if(document.getElementById('screen-top').style.display!=='none')renderTopHistory();
+    setTimeout(()=>{syncPaused=false;},500);
+  });
+}
+function mergeAttempts(local,remote){
+  const seen=new Set(),merged=[];
+  [...local,...remote].sort((a,b)=>(a.timestamp||0)-(b.timestamp||0)).forEach(a=>{const k=a.timestamp+'_'+a.qId;if(!seen.has(k)){seen.add(k);merged.push(a);}});
+  return merged.length>2000?merged.slice(merged.length-2000):merged;
+}
+function mergeHistory(local,remote){
+  const seen=new Set(),merged=[];
+  [...local,...remote].forEach(h=>{const k=h.date+'_'+h.set+'_'+h.pct;if(!seen.has(k)){seen.add(k);merged.push(h);}});
+  return merged.slice(0,5);
+}
+function pushAllToFirebase(){
+  if(!syncDb||!syncCode)return Promise.resolve();
+  const data={};
+  data.tc_all_attempts=localStorage.getItem('tc_all_attempts')||'[]';
+  const sk=['set1','set2','set3','set4','set5','set6','set7','set8','set9','set10','set11','all'];
+  sk.forEach(s=>{const h=localStorage.getItem('tc_hist_'+s);const w=localStorage.getItem('tc_wrong_'+s);if(h)data['tc_hist_'+s]=h;if(w)data['tc_wrong_'+s]=w;});
+  data._lastUpdated=Date.now();
+  return syncDb.ref('sync/'+syncCode).update(data);
+}
+function scheduleSyncPush(){if(!syncCode||!syncDb||syncPaused)return;clearTimeout(syncDebounceTimer);syncDebounceTimer=setTimeout(()=>{pushAllToFirebase().catch(e=>console.warn('Sync push failed:',e));},1500);}
+function updateSyncUI(){const d=document.getElementById('sync-dot'),l=document.getElementById('sync-btn-label');if(!d||!l)return;if(syncCode){d.classList.add('active');l.textContent='同期中';}else{d.classList.remove('active');l.textContent='同期';}}
+function openSyncModal(){document.getElementById('sync-modal').classList.add('show');renderSyncModalContent();}
+function closeSyncModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('sync-modal').classList.remove('show');}
+function renderSyncModalContent(){
+  const c=document.getElementById('sync-modal-content');
+  if(syncCode){
+    c.innerHTML='<div class="sync-current"><div class="sync-code-label">同期コード</div><div class="sync-code-display">'+syncCode+'</div></div><p>他のデバイスでこのコードを入力すると、学習データが同期されます。</p><div class="sync-actions"><button class="sync-btn" onclick="forcePushSync()">今すぐ同期</button><button class="sync-btn sync-btn-danger" onclick="disconnectSync()">同期を解除</button><button class="sync-btn sync-btn-secondary" onclick="closeSyncModal()">閉じる</button></div><div class="sync-status" id="sync-status"></div>';
+  }else{
+    const sc=generateSyncCode();
+    c.innerHTML='<p>同期コードを入力して、複数デバイス間で学習データを共有できます。</p><p>新規の場合は下のコードをそのまま使ってください。既に別デバイスで同期中ならそのコードを入力してください。</p><div class="sync-input-wrap"><input type="text" class="sync-input" id="sync-code-input" maxlength="6" placeholder="XXXXXX" value="'+sc+'" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"></div><button class="sync-generate" onclick="document.getElementById(\'sync-code-input\').value=generateSyncCode()">別のコードを生成</button><div class="sync-actions"><button class="sync-btn" onclick="connectSync(document.getElementById(\'sync-code-input\').value)">接続する</button><button class="sync-btn sync-btn-secondary" onclick="closeSyncModal()">キャンセル</button></div><div class="sync-status" id="sync-status"></div>';
+  }
+}
+function setSyncStatus(msg,type){const el=document.getElementById('sync-status');if(!el)return;el.textContent=msg;el.className='sync-status'+(type?' '+type:'');if(type==='success')setTimeout(()=>{el.textContent='';el.className='sync-status';},3000);}
+function forcePushSync(){if(!syncCode)return;setSyncStatus('同期中...','');pushAllToFirebase().then(()=>setSyncStatus('同期完了！','success')).catch(err=>setSyncStatus('エラー','error'));}
+
 // ===== TEST SCHEDULE PANEL =====
 function renderTestSchedule() {
   if(typeof TEST_SCHEDULE==='undefined'||!TEST_SCHEDULE.length) return;
@@ -1406,7 +1529,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // ===== INIT =====
-applyDark(isDark()); renderTopHistory(); renderTestSchedule(); renderCompanySection(); showScreen('top');
+applyDark(isDark()); renderTopHistory(); renderTestSchedule(); renderCompanySection(); showScreen('top'); initSync();
 </script>
 </body>
 </html>
