@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spi-practice-v2';
+const CACHE_NAME = 'spi-practice-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,9 @@ const ASSETS = [
   './quiz_data_set9.js',
   './quiz_data_set10.js',
   './quiz_data_set11.js',
+  './quiz_data_set12.js',
+  './quiz_data_set13.js',
+  './quiz_data_set14.js',
   './test_schedule_data.js',
   './manifest.json'
 ];

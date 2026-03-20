@@ -4,11 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>テストセンター練習</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2563EB">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -353,7 +348,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
   <button class="sync-toggle-top" onclick="openSyncModal()" id="sync-btn-top"><span class="sync-dot" id="sync-dot"></span><span id="sync-btn-label">同期</span></button>
   <div style="height:44px"></div>
   <div class="app-title">テストセンター練習</div>
-  <div class="app-subtitle">全309問 ── 10セット対応</div>
+  <div class="app-subtitle">全396問 ── 14セット対応</div>
 
   <div class="schedule-section" id="schedule-container"></div>
 
@@ -421,10 +416,25 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
         <div class="set-info"><div class="set-name">第11セット</div><div class="set-desc">Docker／コンテナ技術</div></div>
         <div class="set-badge">15問</div>
       </button>
+      <button class="set-btn" onclick="selectSet('set12')">
+        <div class="set-icon">12</div>
+        <div class="set-info"><div class="set-name">第12セット</div><div class="set-desc">みずほ・文章読解ABC</div></div>
+        <div class="set-badge">24問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set13')">
+        <div class="set-icon">13</div>
+        <div class="set-info"><div class="set-name">第13セット</div><div class="set-desc">みずほ・図表の読み取り</div></div>
+        <div class="set-badge">24問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set14')">
+        <div class="set-icon">14</div>
+        <div class="set-info"><div class="set-name">第14セット</div><div class="set-desc">みずほ・英文読解ABC</div></div>
+        <div class="set-badge">24問</div>
+      </button>
       <button class="set-btn" onclick="selectSet('all')">
         <div class="set-icon">*</div>
-        <div class="set-info"><div class="set-name">全セット混合</div><div class="set-desc">全324問からランダム出題</div></div>
-        <div class="set-badge">324問</div>
+        <div class="set-info"><div class="set-name">全セット混合</div><div class="set-desc">全396問からランダム出題</div></div>
+        <div class="set-badge">396問</div>
       </button>
     </div>
   </div>
@@ -526,6 +536,9 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 <script src="quiz_data_set9.js"></script>
 <script src="quiz_data_set10.js"></script>
 <script src="quiz_data_set11.js"></script>
+<script src="quiz_data_set12.js"></script>
+<script src="quiz_data_set13.js"></script>
+<script src="quiz_data_set14.js"></script>
 <script src="test_schedule_data.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -624,7 +637,10 @@ const SETS = {
   set9: { name: '第9セット', questions: SET9_QUESTIONS, categories: ['文章読解ABC'] },
   set10: { name: '第10セット', questions: SET10_QUESTIONS, categories: ['推測問題'] },
   set11: { name: '第11セット', questions: SET11_QUESTIONS, categories: ['Docker／コンテナ'] },
-  all:  { name: '全セット混合', questions: [...SET1,...SET2,...SET3,...SET4_QUESTIONS,...SET5_QUESTIONS,...SET6_QUESTIONS,...SET7_QUESTIONS,...SET8_QUESTIONS,...SET9_QUESTIONS,...SET10_QUESTIONS,...SET11_QUESTIONS], categories: ['言語','非言語','並べ替え','確率','順序確定','語句用法','表の虫食い','文章の構造把握','数理の構造把握','文章読解ABC','図表の読み取り','英文読解','推測問題','Docker／コンテナ'] }
+  set12: { name: '第12セット', questions: SET12_QUESTIONS, categories: ['文章読解ABC'] },
+  set13: { name: '第13セット', questions: SET13_QUESTIONS, categories: ['図表の読み取り'] },
+  set14: { name: '第14セット', questions: SET14_QUESTIONS, categories: ['英文読解ABC'] },
+  all:  { name: '全セット混合', questions: [...SET1,...SET2,...SET3,...SET4_QUESTIONS,...SET5_QUESTIONS,...SET6_QUESTIONS,...SET7_QUESTIONS,...SET8_QUESTIONS,...SET9_QUESTIONS,...SET10_QUESTIONS,...SET11_QUESTIONS,...SET12_QUESTIONS,...SET13_QUESTIONS,...SET14_QUESTIONS], categories: ['言語','非言語','並べ替え','確率','順序確定','語句用法','表の虫食い','文章の構造把握','数理の構造把握','文章読解ABC','図表の読み取り','英文読解','英文読解ABC','推測問題','Docker／コンテナ'] }
 };
 
 // ===== STATE =====
@@ -1521,11 +1537,6 @@ function handleTimeUp(){
     }
   }
   showResult();
-}
-
-// ===== SERVICE WORKER =====
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 
 // ===== INIT =====
