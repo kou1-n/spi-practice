@@ -115,6 +115,11 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .choice-btn.highlight-correct { border-color: var(--correct); background: var(--correct-light); }
 .choice-btn.highlight-correct .choice-label { color: var(--correct); }
 
+.skip-btn { display: block; width: 100%; background: var(--card); border: 2px dashed var(--border); border-radius: 12px; padding: 12px 14px; cursor: pointer; font-size: 0.85rem; font-family: var(--font); color: var(--text-sub); text-align: center; transition: border-color 0.15s, background 0.15s; margin-bottom: 14px; }
+.skip-btn:hover { border-color: var(--accent); color: var(--accent); }
+.skip-btn:disabled { cursor: default; opacity: 0.5; }
+.skip-btn.skipped { border-color: var(--wrong); background: var(--wrong-light); color: var(--wrong); font-weight: 700; }
+
 .answer-result { display: none; padding: 12px 14px; border-radius: 10px; font-size: 0.9rem; font-weight: 700; margin-bottom: 12px; animation: fadeIn 0.25s ease; }
 .answer-result.show { display: block; }
 .answer-result.correct { background: var(--correct-light); color: var(--correct); }
@@ -766,6 +771,7 @@ function renderQuestion() {
     h += `<button class="choice-btn" id="choice-${i}" onclick="selectAnswer(${i})"><span class="choice-label">${c.label}</span><span>${c.text}</span></button>`;
   });
   h += '</div>';
+  h += '<button class="skip-btn" id="skip-btn" onclick="skipAnswer()">分からない</button>';
   h += '<div class="answer-result" id="answer-result"></div>';
   h += `<button class="explanation-toggle" id="expl-toggle" onclick="toggleExpl()">解説を見る</button>`;
   h += `<div class="explanation-box" id="expl-box">${q.explanation}</div>`;
@@ -786,6 +792,7 @@ function selectAnswer(ci) {
     if(i===ci&&!correct) btn.classList.add('wrong');
     if(i===ci&&correct) btn.classList.add('correct');
   }
+  const skipBtn=document.getElementById('skip-btn'); skipBtn.disabled=true;
   const r=document.getElementById('answer-result'); r.classList.add('show');
   if(correct) { r.classList.add('correct'); r.textContent='正解！'; }
   else { r.classList.add('wrong'); r.textContent='不正解。正解は '+q.answer+' です。'; }
@@ -794,6 +801,24 @@ function selectAnswer(ci) {
   if(state.currentIdx<state.questions.length-1) document.getElementById('swipe-hint').style.display='block';
   state.results.push({id:q.id, category:q.category, correct});
   recordAttempt(q.id, state.setKey, q.category, q.subcategory, q.choices[ci].label, q.answer, correct);
+}
+function skipAnswer() {
+  if(state.answered) return;
+  state.answered=true;
+  const q=state.questions[state.currentIdx];
+  const ansIdx = q.choices.findIndex(c=>c.label===q.answer);
+  for(let i=0;i<q.choices.length;i++) {
+    const btn=document.getElementById('choice-'+i); btn.disabled=true;
+    if(i===ansIdx) btn.classList.add('highlight-correct');
+  }
+  const skipBtn=document.getElementById('skip-btn'); skipBtn.disabled=true; skipBtn.classList.add('skipped');
+  const r=document.getElementById('answer-result'); r.classList.add('show','wrong');
+  r.textContent='正解は '+q.answer+' です。';
+  document.getElementById('expl-toggle').classList.add('show');
+  document.getElementById('next-btn').classList.add('show');
+  if(state.currentIdx<state.questions.length-1) document.getElementById('swipe-hint').style.display='block';
+  state.results.push({id:q.id, category:q.category, correct:false});
+  recordAttempt(q.id, state.setKey, q.category, q.subcategory, 'skip', q.answer, false);
 }
 function toggleExpl() { const b=document.getElementById('expl-box'),t=document.getElementById('expl-toggle'); const s=b.classList.contains('show'); if(s){b.classList.remove('show');t.textContent='解説を見る';}else{b.classList.add('show');t.textContent='解説を閉じる';setTimeout(()=>b.scrollIntoView({behavior:'smooth',block:'nearest'}),100);} }
 function nextQuestion() { const c=document.getElementById('main-card'); c.classList.add('slide-out'); setTimeout(()=>{ if(state.currentIdx>=state.questions.length-1) showResult(); else { state.currentIdx++; renderQuestion(); window.scrollTo({top:0,behavior:'smooth'}); } },200); }
