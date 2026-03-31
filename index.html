@@ -431,10 +431,20 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
         <div class="set-info"><div class="set-name">第14セット</div><div class="set-desc">みずほ・英文読解ABC</div></div>
         <div class="set-badge">24問</div>
       </button>
+      <button class="set-btn" onclick="selectSet('set15')">
+        <div class="set-icon">15</div>
+        <div class="set-info"><div class="set-name">第15セット</div><div class="set-desc">ファストリ・言語＋非言語</div></div>
+        <div class="set-badge">31問</div>
+      </button>
+      <button class="set-btn" onclick="selectSet('set16')">
+        <div class="set-icon">16</div>
+        <div class="set-info"><div class="set-name">第16セット</div><div class="set-desc">フェルミ推定・ケース面接対策</div></div>
+        <div class="set-badge">12問</div>
+      </button>
       <button class="set-btn" onclick="selectSet('all')">
         <div class="set-icon">*</div>
-        <div class="set-info"><div class="set-name">全セット混合</div><div class="set-desc">全396問からランダム出題</div></div>
-        <div class="set-badge">396問</div>
+        <div class="set-info"><div class="set-name">全セット混合</div><div class="set-desc">全408問からランダム出題</div></div>
+        <div class="set-badge">408問</div>
       </button>
     </div>
   </div>
@@ -539,6 +549,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 <script src="quiz_data_set12.js"></script>
 <script src="quiz_data_set13.js"></script>
 <script src="quiz_data_set14.js"></script>
+<script src="quiz_data_set15.js"></script>
+<script src="quiz_data_set16.js"></script>
 <script src="test_schedule_data.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -640,7 +652,9 @@ const SETS = {
   set12: { name: '第12セット', questions: SET12_QUESTIONS, categories: ['文章読解ABC'] },
   set13: { name: '第13セット', questions: SET13_QUESTIONS, categories: ['図表の読み取り'] },
   set14: { name: '第14セット', questions: SET14_QUESTIONS, categories: ['英文読解ABC'] },
-  all:  { name: '全セット混合', questions: [...SET1,...SET2,...SET3,...SET4_QUESTIONS,...SET5_QUESTIONS,...SET6_QUESTIONS,...SET7_QUESTIONS,...SET8_QUESTIONS,...SET9_QUESTIONS,...SET10_QUESTIONS,...SET11_QUESTIONS,...SET12_QUESTIONS,...SET13_QUESTIONS,...SET14_QUESTIONS], categories: ['言語','非言語','並べ替え','確率','順序確定','語句用法','表の虫食い','文章の構造把握','数理の構造把握','文章読解ABC','図表の読み取り','英文読解','英文読解ABC','推測問題','Docker／コンテナ'] }
+  set15: { name: '第15セット', questions: SET15_QUESTIONS, categories: ['熟語の成り立ち','空欄補充','長文読解','料金の割引','集合','加重平均','分配と割合','割合','損益算','速さ','確率','推論','場合の数','表の読み取り','濃度','仕事算','年齢算','整数の性質','代金の計算'] },
+  set16: { name: '第16セット', questions: SET16_QUESTIONS, categories: ['フェルミ推定：市場規模','フェルミ推定：数量推定','フェルミ推定：売上推定','フェルミ推定：社会・インフラ'] },
+  all:  { name: '全セット混合', questions: [...SET1,...SET2,...SET3,...SET4_QUESTIONS,...SET5_QUESTIONS,...SET6_QUESTIONS,...SET7_QUESTIONS,...SET8_QUESTIONS,...SET9_QUESTIONS,...SET10_QUESTIONS,...SET11_QUESTIONS,...SET12_QUESTIONS,...SET13_QUESTIONS,...SET14_QUESTIONS,...SET15_QUESTIONS,...SET16_QUESTIONS], categories: ['言語','非言語','並べ替え','確率','順序確定','語句用法','表の虫食い','文章の構造把握','数理の構造把握','文章読解ABC','図表の読み取り','英文読解','英文読解ABC','推測問題','Docker／コンテナ','熟語の成り立ち','空欄補充','長文読解','料金の割引','集合','加重平均','分配と割合','割合','損益算','速さ','確率','推論','場合の数','表の読み取り','濃度','仕事算','年齢算','整数の性質','代金の計算','フェルミ推定：市場規模','フェルミ推定：数量推定','フェルミ推定：売上推定','フェルミ推定：社会・インフラ'] }
 };
 
 // ===== STATE =====
@@ -680,9 +694,9 @@ function fmtTime(s) { return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); 
 // ===== SET SELECTION =====
 function selectSet(key) {
   state.setKey = key; state.lastSetKey = key;
-  document.querySelectorAll('.set-btn').forEach((b,i) => {
-    const keys = ['set1','set2','set3','set4','set5','set6','set7','set8','set9','set10','set11','all'];
-    b.classList.toggle('active', keys[i]===key);
+  document.querySelectorAll('.set-btn').forEach(b => {
+    const btnKey = b.getAttribute('onclick')?.match(/selectSet\('([^']+)'\)/)?.[1];
+    b.classList.toggle('active', btnKey===key);
   });
   const ms = document.getElementById('mode-section');
   ms.classList.add('show');
